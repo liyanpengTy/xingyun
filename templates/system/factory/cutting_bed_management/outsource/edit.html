@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>裁床管理-厂外协作-修改厂外协作信息</title>
+    {% include 'system/common/header.html' %}</head>
+<body>
+    <form class="layui-form" action="" id="outsource-form">
+        <div class="mainBox">
+            <div class="main-container">
+                <div class="main-container">
+                    <div class="layui-form-item layui-hide">
+                        <label class="layui-form-label">ID</label>
+                        <div class="layui-input-block">
+                            <input type="text" value="{{ outsource_id }}" name="outsourceId" lay-verify="title"
+                                   autocomplete="off" placeholder="" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">款号</label>
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ product_model_number }}
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">数量</label>
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ units_number }}
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">品类</label>
+                        <div class="layui-input-block">
+                            <input type="text" value="{{ outsources.outsource_type }}" name="outsourceType"
+                                   lay-verify="title" autocomplete="off" placeholder="请输入品类" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">单价</label>
+                        <div class="layui-input-block">
+                            <input type="text" value="{{ outsources.unit_price }}" name="unitPrice"
+                                   lay-verify="title" autocomplete="off" placeholder="请输入单价" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">协助客户</label>
+                        <div class="layui-input-block">
+                            <select name="clientId" lay-verify="required" placeholder="" class="layui-select">
+                                <option value="">请选择协助客户</option>
+                                {% for client in clients %}
+                                <option value="{{ client.id }}" {% if client.id == outsources.client_id %}selected{% endif %}>{{ client.client_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bottom">
+            <div class="button-container">
+                <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit="" lay-filter="outsource-save">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button type="reset" class="pear-btn pear-btn-sm">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {% include 'system/common/footer.html' %}
+    <script>
+        layui.use(['form', 'jquery'], function () {
+            let form = layui.form;
+            let $ = layui.jquery;
+
+            form.on('submit(outsource-save)', function (data) {
+                console.log(data.field);
+                $.ajax({
+                    url: '/system/factory/cutting_bed_management/outsource/update',
+                    data: JSON.stringify(data.field),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'post',
+                    success: function (result) {
+                        if (result.success) {
+                            layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
+                                parent.layer.close(parent.layer.getFrameIndex(window.name));
+                                parent.layui.table.reload('outsource-table');
+                            });
+                        } else {
+                            layer.msg(result.msg, { icon: 2, time: 1000 });
+                        }
+                    },
+                    error: function () {
+                        layer.msg('网络或服务器错误，请稍后再试', { icon: 2, time: 1000 });
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+</body>
+</html>

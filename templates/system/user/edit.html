@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>用户编辑</title>
@@ -14,42 +13,63 @@
                     <label class="layui-form-label">编号</label>
                     <div class="layui-input-block">
                         <input type="text" value="{{ user.id }}" name="userId" lay-verify="title"
-                               autocomplete="off" placeholder="请输入标题" class="layui-input">
+                               autocomplete="off" placeholder="请输入编号" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">账号</label>
                     <div class="layui-input-block">
                         <input type="text" value="{{ user.username }}" name="username" lay-verify="title"
-                               autocomplete="off" placeholder="请输入标题" class="layui-input">
+                               autocomplete="off" placeholder="请输入账号" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">姓名</label>
                     <div class="layui-input-block">
                         <input type="text" value="{{ user.realname }}" name="realName" lay-verify="title"
-                               autocomplete="off" placeholder="请输入标题"
+                               autocomplete="off" placeholder="请输入姓名"
+                               class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">联系电话</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ user.phone }}" name="phone" lay-verify="title"
+                               autocomplete="off" placeholder="请输入联系电话"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">部门</label>
-                    <div class="layui-input-block">
+                    <div class="layui-input-block" >
                         <ul id="selectParent" name="deptId" class="dtree" data-id="0"></ul>
                     </div>
                 </div>
-
-
                 <div class="layui-form-item">
-                    <label class="layui-form-label">角色</label>
+                    <label class="layui-form-label">用户角色</label>
                     <div class="layui-input-block">
-                        {% for role in roles %}
-                            <input{% if role.id in checked_roles %}
-                                checked
-                            {% endif %}
-                                value="{{ role.id }}" title="{{ role.name }}" type="checkbox"
-                                name="roleIds" lay-skin="primary">
-                        {% endfor %}
+                        <select name="roleId" lay-verify="required">
+                            <option value="">请选择用户角色</option>
+                            {% for role in roles %}
+                                <option value="{{ role.id }}" {% if role.id == current_user_role_id %}selected{% endif %}>{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="startTimeItem" {% if user.user_type == 'userInternal' %}style="display: none;"{% endif %}>
+                    <label class="layui-form-label">生效日期</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="start_time" name="start_time" class="layui-input" placeholder="请选择开始时间"
+                        {% if user.start_time %}value="{{ user.start_time }}"{% endif %}>
+                    </div>
+                </div>
+
+                <div class="layui-form-item" id="endTimeItem" {% if user.user_type == 'userInternal' %}style="display: none;"{% endif %}>
+                    <label class="layui-form-label">截止日期</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="end_time" name="end_time" class="layui-input" placeholder="请选择结束时间"
+                        {% if user.end_time %}value="{{ user.end_time }}"{% endif %}>
                     </div>
                 </div>
             </div>
@@ -86,6 +106,7 @@
             response: {treeId: 'id', parentId: 'parent_id', title: 'dept_name'},
             selectInitVal: "{{ user.dept_id }}"
         })
+
         form.on('submit(user-update)', function (data) {
             let roleIds = ''
             $('input[type=checkbox]:checked').each(function () {
@@ -113,6 +134,34 @@
             return false
         })
     })
+</script>
+<script>
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        var $ = layui.$;
+
+        laydate.render({
+            elem: '#start_time',
+            type: 'date',
+            format: 'yyyy-MM-dd HH:mm:ss',
+        });
+
+        laydate.render({
+            elem: '#end_time',
+            type: 'date',
+            format: 'yyyy-MM-dd HH:mm:ss',
+        });
+
+        $(document).dblclick(function(e){
+            var target = $(e.target);
+            if(target.hasClass('laydate-day') && !target.hasClass('laydate-disabled')){
+                var date = target.text();
+                var input = target.closest('.laydate').prev();
+                laydate.now(new Date(date));
+                input.val(date);
+            }
+        });
+    });
 </script>
 </body>
 </html>

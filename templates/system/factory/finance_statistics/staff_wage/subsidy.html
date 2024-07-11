@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>财务统计-员工工资-统一设置补助</title>
+    {% include 'system/common/header.html' %}
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">房租补助：</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="rentSubsidy"
+                               autocomplete="off" placeholder="请输入房租补助金额" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">生活补助：</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="lifeSubsidy"
+                               autocomplete="off" placeholder="请输入生活补助金额" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">其它补助：</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="otherSubsidy"
+                               autocomplete="off" placeholder="请输入其它补助金额" class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit=""
+                    lay-filter="subsidy-update">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['form', 'jquery'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        form.on('submit(subsidy-update)', function (data) {
+            layer.confirm('确认统一设置补助吗？', { icon: 3, title: '提示' }, function (index) {
+                $.ajax({
+                    url: '/system/factory/finance_statistics/staff_wage/subsidy_update',
+                    data: JSON.stringify(data.field),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'put',
+                    success: function (result) {
+                        if (result.success) {
+                            layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
+                                parent.layer.close(parent.layer.getFrameIndex(window.name));
+                                parent.layui.table.reload('finance-table');
+                            });
+                        } else {
+                            layer.msg(result.msg, { icon: 2, time: 1000 });
+                        }
+                    },
+                    error: function () {
+                        layer.msg('网络或服务器错误，请稍后再试', { icon: 2, time: 1000 });
+                    }
+                });
+                return false;
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

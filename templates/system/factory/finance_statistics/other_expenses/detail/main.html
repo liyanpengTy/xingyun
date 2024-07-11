@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>财务统计-其他支出-明细</title>
+    {% include 'system/common/header.html' %}
+</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">年月</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="yearMonth" id="yearMonth" placeholder="请选择年月" autocomplete="off"
+                           class="layui-input">
+                </div>
+                <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="other-detail-query">
+                    <i class="layui-icon layui-icon-search"></i>
+                    查询
+                </button>
+                <button type="reset" class="pear-btn pear-btn-md">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="finance-other-expenses-detail-table" lay-filter="finance-other-expenses-detail-table"></table>
+    </div>
+</div>
+</body>
+
+<script type="text/html" id="other-toolbar">
+    <button lay-event="back-button" class="pear-btn gray-btn pear-btn-md">
+        <i class="layui-icon layui-icon-return"></i>
+    </button>
+</script>
+
+<script type="text/html" id="finance-bar">
+    {% if authorize("system:finance_statistics:other_expenses:detail:edit") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i
+                class="layui-icon"> 修改 </i>
+        </button>
+    {% endif %}
+</script>
+
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['table', 'form', 'jquery', 'common'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let common = layui.common;
+
+        let MODULE_PATH = '/system/factory/finance_statistics/other_expenses/detail/'
+
+        let cols = [
+            [
+                {title: '序号', type: 'numbers', align: 'center'},
+                {title: '日期', field: 'date', align: 'center'},
+                {title: '名称', field: 'name', align: 'center'},
+                {title: '类别', field: 'category', align: 'center'},
+                {title: '单价', field: 'unit_price', align: 'center'},
+                {title: '数量', field: 'quantity', align: 'center'},
+                {title: '单位', field: 'unit', align: 'center'},
+                {title: '合计', field: 'amount', align: 'center'},
+                {title: '操作', toolbar: '#finance-bar', align: 'center', width: 240}
+            ]
+        ]
+
+        table.render({
+            elem: '#finance-other-expenses-detail-table',
+            url: MODULE_PATH + 'data/' + {{ other_id }},
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#other-toolbar',
+            defaultToolbar: [{
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports']
+        })
+
+        table.on('tool(finance-other-expenses-detail-table)', function (obj) {
+            if (obj.event === 'edit') {
+                 window.edit(obj)
+            }
+        })
+
+        form.on('submit(other-detail-query)', function (data) {
+            table.reload('finance-other-expenses-detail-table', {where: data.field})
+            return false
+        })
+
+        window.edit = function (obj) {
+            layer.open({
+                type: 2,
+                title: '修改',
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'edit/' + obj.data['id']
+            })
+        }
+
+        table.on('toolbar(finance-other-expenses-detail-table)', function (obj) {
+            if (obj.event === 'back-button') {
+                window.history.back()
+                table.reload('finance-other-expenses-detail-table', {
+                   url: '/system/factory/finance_statistics/other_expenses/data'
+                });
+            }
+        })
+
+        window.refresh = function () {
+            table.reload('finance-other-expenses-detail-table')
+        }
+    })
+</script>
+<script>
+    layui.use('laydate', function () {
+        let laydate = layui.laydate;
+        let $ = layui.$;
+
+        laydate.render({
+            elem: '#yearMonth',
+            type: 'date',
+            done: function (value) {
+                console.log(value);
+            }
+        });
+
+        $(document).dblclick(function(e){
+            var target = $(e.target);
+            if(target.hasClass('laydate-day') && !target.hasClass('laydate-disabled')){
+                var date = target.text();
+                var input = target.closest('.laydate').prev();
+                laydate.now(new Date(date));
+                input.val(date);
+            }
+        });
+    });
+</script>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>客户管理-修改客户信息</title>
+    {% include 'system/common/header.html' %}</head>
+<body>
+<form class="layui-form" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">客户编号</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ client.id }}" name="clientId" lay-verify="title"
+                               autocomplete="off" placeholder="请输入客户编号" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客户姓名</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ client.client_name }}" name="clientName" lay-verify="required"
+                               autocomplete="off" placeholder="请输入客户姓名" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">联系电话</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ client.client_phone }}" name="clientPhone" lay-verify="title"
+                               autocomplete="off" placeholder="请输入标题" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客户类型</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="client_type" value="orderClient" title="订单客户" {% if client.client_type == 'orderClient' %}checked{% endif %}>
+                        <input type="radio" name="client_type" value="externalClient" title="外发客户" {% if client.client_type == 'externalClient' %}checked{% endif %}>
+                        <input type="radio" name="client_type" value="partnerClient" title="协作客户" {% if client.client_type == 'partnerClient' %}checked{% endif %}>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit=""
+                    lay-filter="client-update">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+{% include 'system/common/footer.html' %}
+<script>
+  layui.use(['form', 'jquery'], function () {
+    let form = layui.form
+    let $ = layui.jquery
+
+    form.on('submit(client-update)', function (data) {
+      $.ajax({
+        url: '/system/factory/client_management/update',
+        data: JSON.stringify(data.field),
+        dataType: 'json',
+        contentType: 'application/json',
+        type: 'put',
+        success: function (result) {
+          if (result.success) {
+            layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
+              parent.layer.close(parent.layer.getFrameIndex(window.name))//关闭当前页
+              parent.layui.table.reload('client-table')
+            })
+          } else {
+            layer.msg(result.msg, { icon: 2, time: 1000 })
+          }
+        }
+      })
+      return false
+    })
+  })
+</script>
+<script>
+</script>
+</body>
+</html>

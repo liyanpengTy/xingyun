@@ -11,6 +11,7 @@ from applications.schemas import RoleOutSchema, PowerOutSchema2
 
 bp = Blueprint('role', __name__, url_prefix='/role')
 
+
 # 用户管理
 @bp.get('/')
 @authorize("system:role:main")
@@ -30,7 +31,18 @@ def table():
     if role_code:
         filters.append(Role.code.contains(role_code))
     roles = Role.query.filter(*filters).layui_paginate()
-    return table_api(data=RoleOutSchema(many=True).dump(roles), count=roles.total)
+    # 创建序列化实例
+    schema = RoleOutSchema(many=True)
+    # 序列化数据
+    result = schema.dump(roles)
+    # result类型为列表包字典[{},{}]，以下是利用for循环，修改isInternal的值
+    # 若后面role表中的internal字段增加了枚举值，需要增加对应的判断条件
+    for isInternal_dict in result:
+        if isInternal_dict["isInternal"] == "internal":
+            isInternal_dict["isInternal"] = "内部角色"
+        elif isInternal_dict["isInternal"] == "factory":
+            isInternal_dict["isInternal"] = "工厂角色"
+    return table_api(data=result, count=roles.total)
 
 
 # 角色增加
@@ -50,16 +62,22 @@ def save():
     roleCode = str_escape(req.get("roleCode"))
     roleName = str_escape(req.get("roleName"))
     sort = str_escape(req.get("sort"))
+    isInternal = str_escape(req.get("isInternal"))
+    # 定义isInternal的值，用作写入数据库的校验规则
+    allowed_values = ['internal', 'factory']
+    if isInternal not in allowed_values:
+        return fail_api(msg="新增角色失败，角色类型的值为非法值")
     role = Role(
         details=details,
         enable=enable,
         code=roleCode,
         name=roleName,
-        sort=sort
+        sort=sort,
+        isInternal=isInternal
     )
     db.session.add(role)
     db.session.commit()
-    return success_api(msg="成功")
+    return success_api(msg="新增角色成功")
 
 
 # 角色授权
@@ -129,7 +147,8 @@ def update():
         "name": str_escape(req_json.get("roleName")),
         "sort": str_escape(req_json.get("sort")),
         "enable": str_escape(req_json.get("enable")),
-        "details": str_escape(req_json.get("details"))
+        "details": str_escape(req_json.get("details")),
+        "isInternal": str_escape(req_json.get("isInternal"))
     }
     role = Role.query.filter_by(id=id).update(data)
     db.session.commit()

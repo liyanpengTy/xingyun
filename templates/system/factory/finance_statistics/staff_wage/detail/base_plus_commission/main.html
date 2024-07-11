@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns="">
+<head>
+    <title>财务统计-员工工资-详情-【底薪+提成】</title>
+    {% include 'system/common/header.html' %}</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">姓名</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="name" value= "{{ staff.staff_name }}" readonly class="layui-input">
+                </div>
+                <label class="layui-form-label">职位</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="position" value="{{ role.name }}" readonly class="layui-input">
+                </div>
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="status" value="{{ staff_status }}" readonly class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">年月</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="month" value="{{ finance_staff.year }}年{{  finance_staff.month   }}月" readonly class="layui-input">
+                </div>
+                <label class="layui-form-label">薪资类型</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="salary_type" value="{{ salary_type }}" readonly class="layui-input">
+                </div>
+                <label class="layui-form-label">底薪</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="salary_type" value="{{ staff.base_salary }}（元/月）" readonly class="layui-input">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="finance_staff_detail-tables" lay-filter="finance_staff_detail-tables"></table>
+    </div>
+</div>
+</body>
+
+<script type="text/html" id="cutting-toolbar">
+    <button lay-event="back-button" class="pear-btn gray-btn pear-btn-md">
+        <i class="layui-icon layui-icon-return"></i>
+    </button>
+</script>
+
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['table', 'form', 'jquery', 'popup', 'common'], function () {
+        let table = layui.table
+        let form = layui.form
+        let $ = layui.jquery
+        let popup = layui.popup
+
+        let MODULE_PATH = '/system/factory/finance_statistics/staff_wage/detail/base_plus_commission/'
+
+        let cols = [
+            [
+                {title: '序号', type: 'numbers', align: 'center'},
+                {title: '日期', field: 'date', align: 'center'},
+                {title: '数量', field: 'piece_work_count', align: 'center'},
+                {title: '单价(元)', field: 'sew_unit_price', align: 'center'},
+                {title: '总价(元)', field: 'total_price', align: 'center'},
+            ]
+        ]
+
+        table.render({
+            elem: '#finance_staff_detail-tables',
+            url: MODULE_PATH + 'data_base_plus_commission/' + {{ finance_staff_id }},
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#cutting-toolbar',
+            scroll: true,
+            fixed: 'table'
+        })
+
+        table.on('toolbar(finance_staff_detail-tables)', function (obj) {
+            if (obj.event === 'back-button') {
+                window.history.back()
+            }
+        })
+
+        form.on('submit(cutting-query)', function (data) {
+            table.reload('finance_staff_detail-tables', {where: data.field})
+            return false
+        })
+
+        window.refresh = function () {
+            table.reload('finance_staff_detail-tables')
+        }
+    })
+</script>
+</html>

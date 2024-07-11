@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>裁床管理</title>
+    {% include 'system/common/header.html' %}</head>
+<body class="pear-container">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">款号</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="productModelNumber" placeholder="请输入款号" class="layui-input">
+                    </div>
+                    <label class="layui-form-label">订单状态</label>
+                    <div class="layui-input-inline">
+                        <select name="orderStatus" class="layui-select">
+                            <option value="">请选择订单状态</option>
+                            <option value="Submitted">订单提交</option>
+                            <option value="Cutting">裁剪分包</option>
+                            <option value="CuttingCompleted">裁剪完成</option>
+                            <option value="Sewing">缝制生产</option>
+                            <option value="Packing">包装发货</option>
+                            <option value="Completed">完成订单</option>
+                        </select>
+                    </div>
+                    <label class="layui-form-label">裁货日期</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="startDate" class="layui-input" id="start-date" placeholder="开始日期">
+                    </div>
+                    <div class="layui-form-mid">-</div>
+                    <div class="layui-input-inline">
+                        <input type="text" name="endDate" class="layui-input" id="end-date" placeholder="结束日期">
+                    </div>
+                    <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="cutting-query">
+                        <i class="layui-icon layui-icon-search"></i>
+                        查询
+                    </button>
+                    <button type="reset" class="pear-btn pear-btn-md">
+                        <i class="layui-icon layui-icon-refresh"></i>
+                        重置
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table id="cutting-table" lay-filter="cutting-table"></table>
+        </div>
+    </div>
+</body>
+
+<script type="text/html" id="cutting-toolbar">
+    {% if authorize("system:cutting_bed:add") %}
+        <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+            <i class="layui-icon layui-icon-add-1"></i>
+            新增
+        </button>
+    {% endif %}
+</script>
+
+<script type="text/html" id="cutting-bar">
+    {% if authorize("system:order:detail") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="orderDetail">
+            <i class="layui-icon "> 订单详情 </i>
+        </button>
+    {% endif %}
+    {% if authorize("system:cutting_bed:edit") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit">
+            <i class="layui-icon "> 修改 </i>
+        </button>
+    {% endif %}
+    {% if authorize("system:cutting_bed:detail") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="detail">
+            <i class="layui-icon "> 裁床单详情 </i>
+        </button>
+    {% endif %}
+    {% if authorize("system:cutting_bed:complete") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="complete">
+            <i class="layui-icon "> 完成裁剪 </i>
+        </button>
+    {% endif %}
+    {% if authorize("system:cutting_bed:outsource") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="outsource">
+            <i class="layui-icon "> 厂外协助 </i>
+        </button>
+    {% endif %}
+</script>
+
+{% raw %}
+<script type="text/html" id="cutting_date">
+    {{layui.util.toDateString(d.cutting_date,  "yyyy-MM-dd HH:mm:ss")}}
+</script>
+{% endraw %}
+
+
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['table', 'form', 'jquery', 'popup', 'common', 'laydate'], function () {
+        let table = layui.table
+        let form = layui.form
+        let $ = layui.jquery
+        let popup = layui.popup
+        let laydate = layui.laydate
+
+        let MODULE_PATH = '/system/factory/cutting_bed_management/'
+
+        let cols = [
+            [
+                {title: '序号', type: 'numbers', align: 'center', width: 60},
+                {title: '款号', field: 'product_model_number', align: 'center', width: 100},
+                {title: '订单状态', field: 'order_status', align: 'center', width: 100},
+                {title: '床次', field: 'bed_number', align: 'center', width: 150},
+                {title: '扎号总数量', field: 'bundle_code_number', align: 'center', width: 130},
+                {title: '件数总数量', field: 'units_number', align: 'center'},
+                {title: '关联床次', field: 'parent_level_number', align: 'center'},
+                {title: '裁货日期', field: 'cutting_date', templet: '#cutting_date', align: 'center'},
+                {title: '裁货人员', field: 'staff_name', align: 'center'},
+                {title: '操作', toolbar: '#cutting-bar', align: 'center', width: 425}
+            ]
+        ]
+
+        table.render({
+            elem: '#cutting-table',
+            url: MODULE_PATH + 'data',
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#cutting-toolbar',
+            defaultToolbar: [{
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports'],
+        })
+
+        table.on('tool(cutting-table)', function (obj) {
+            let data = obj.data
+            let $tr = $(obj.tr);
+            let order_status = data.order_status;
+            let units_number = data.units_number;
+
+            if (obj.event === 'edit') {
+                if (data.is_completed === false){
+                    window.edit(obj)
+                } else {
+                    layer.msg('该订单已完成裁剪工作，无法修改！');
+                }
+            } else if (obj.event === 'detail') {
+                if (data.is_completed === false){
+                    window.location.href = '/system/factory/cutting_bed_management/detail/yes/' + obj.data['id']
+                } else {
+                    window.location.href = '/system/factory/cutting_bed_management/detail/no/' + obj.data['id']
+                }
+            } else if (obj.event === 'complete') {
+                if (data.is_completed === false){
+                    window.complete(obj)
+                } else {
+                    layer.msg('该订单已完成裁剪工作，无法执行“完成裁剪”操作！');
+                }
+            } else if (obj.event === 'orderDetail') {
+                if (order_status === '裁剪分包' || order_status === '裁剪完成'){
+                    window.location.href = '/system/factory/order_management/detail/no/' + obj.data['order_id'];
+                } else {
+                    layer.msg('该订单状态无法查看订单详情！');
+                }
+            } else if (obj.event === 'outsource') {
+                if (order_status === '裁剪完成' || order_status === '缝制生产'){
+                    window.location.href = '/system/factory/cutting_bed_management/outsource/' + obj.data['order_id'];
+                } else {
+                    layer.msg('该订单状态【' + order_status + '】无法进行厂外协作！');
+                }
+            }
+        })
+
+        table.on('toolbar(cutting-table)', function (obj) {
+            if (obj.event === 'add') {
+                window.add()
+            } else if (obj.event === 'refresh') {
+                window.refresh()
+            }
+        })
+
+        form.on('submit(cutting-query)', function (data) {
+            table.reload('cutting-table', {where: data.field})
+            return false
+        })
+
+        window.onload = function() {
+            laydate.render({
+                elem: '#start-date',
+                type: 'date',
+                    done: function(value, date, endDate) {
+                    laydate.render({
+                        elem: '#end-date',
+                        type: 'date',
+                        min: value
+                    });
+                }
+            });
+            laydate.render({
+                elem: '#end-date',
+                type: 'date',
+                min: '2020-01-01'
+            });
+        }
+
+        window.add = function () {
+            layer.open({
+                type: 2,
+                title: '新增',
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'add'
+            })
+        }
+
+        window.edit = function (obj) {
+            layer.open({
+                type: 2,
+                title: '修改',
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'edit/' + obj.data['id']
+            })
+        }
+
+        window.complete = function (obj) {
+            layer.confirm('确认完成裁剪分包工作，并将关联裁床单状态改为完成？', {icon: 3, title: '提示'}, function (index) {
+                layer.close(index)
+                let loading = layer.load()
+                $.ajax({
+                    url: MODULE_PATH + 'complete/' + obj.data['id'],
+                    dataType: 'json',
+                    type: 'post',
+                    success: function (result) {
+                        layer.close(loading)
+                        if (result.success) {
+                            popup.success(result.msg, function () {
+                                obj.update();
+                                window.refresh();
+                            })
+                        } else {
+                            popup.failure(result.msg)
+                        }
+                    }
+                })
+            })
+        }
+
+        window.refresh = function () {
+            table.reload('cutting-table')
+        }
+    })
+</script>
+</html>

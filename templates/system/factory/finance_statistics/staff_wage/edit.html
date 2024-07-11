@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>财务统计-员工工资-修改</title>
+    {% include 'system/common/header.html' %}
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">id</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ finance_staff_id }}" name="financeStaffId" lay-verify="title"
+                               autocomplete="off" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客户姓名：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ staffs.staff_name }}
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">职位：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ roles.name }}
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">年月：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ finance_staffs.year }} 年 {{finance_staffs.month }} 月
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">房租补助：</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ finance_staffs.rent_subsidy }}" name="rentSubsidy"
+                               autocomplete="off" placeholder="请输入房租补助金额" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">生活补助：</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ finance_staffs.life_subsidy }}" name="lifeSubsidy"
+                               autocomplete="off" placeholder="请输入生活补助金额" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">其它补助：</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ finance_staffs.other_subsidy }}" name="otherSubsidy"
+                               autocomplete="off" placeholder="请输入其它补助金额" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">预支工资：</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ finance_staffs.advance_salary }}" name="advanceSalary"
+                               autocomplete="off" placeholder="请输入预支工资金额" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">其它扣除：</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ finance_staffs.other_deduction }}" name="otherDeduction"
+                               autocomplete="off" placeholder="请输入其它扣除金额" class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit=""
+                    lay-filter="finance-staff-wage-update">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['form', 'jquery'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        form.on('submit(finance-staff-wage-update)', function (data) {
+            console.log(data.field);
+            $.ajax({
+                url: '/system/factory/finance_statistics/staff_wage/update',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'put',
+                success: function (result) {
+                    if (result.success) {
+                        layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));
+                            parent.layui.table.reload('finance-staff-wage-table');
+                        });
+                    } else {
+                        layer.msg(result.msg, { icon: 2, time: 1000 });
+                    }
+                },
+                error: function () {
+                    layer.msg('网络或服务器错误，请稍后再试', { icon: 2, time: 1000 });
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

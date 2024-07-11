@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns="">
+<head>
+    <title>订单管理-订单详情-可修改</title>
+    {% include 'system/common/header.html' %}</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="order-detail-table" lay-filter="order-detail-table"></table>
+    </div>
+</div>
+</body>
+
+<script type="text/html" id="order-toolbar">
+    <button class="pear-btn pear-btn-md" lay-event="back-button">
+        <i class="layui-icon layui-icon-return"></i>
+    </button>
+    {% if authorize("system:order:detail:add") %}
+        <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+            <i class="layui-icon layui-icon-add-1"></i>
+            新增
+        </button>
+    {% endif %}
+</script>
+
+<script type="text/html" id="order-bar">
+    {% if authorize("system:order:detail:edit") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i
+                class="layui-icon layui-icon-edit"> 修改 </i>
+        </button>
+    {% endif %}
+</script>
+
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['table', 'form', 'jquery', 'popup', 'common'], function () {
+        let table = layui.table
+        let form = layui.form
+        let $ = layui.jquery
+        let popup = layui.popup
+
+        let MODULE_PATH = '/system/factory/order_management/detail/yes/'
+
+        var defaultOrderId = {{ order_id }};
+
+        // 使用 JavaScript 设置隐藏 input 元素的值
+        $('input[name="id"]').val(defaultOrderId);
+
+        let cols = [
+            [
+                {title: '序号', type: 'numbers', align: 'center'},
+                {title: '颜色', field: 'name', align: 'center'},
+                {title: '数量', field: 'quantity', align: 'center'},
+                {title: '尺码', field: 'size', align: 'center'},
+                {title: '操作', toolbar: '#order-bar', align: 'center', width: 316}
+            ]
+        ]
+
+        table.render({
+            elem: '#order-detail-table',
+            url: MODULE_PATH + 'data_yes/' + {{ order_id }},
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#order-toolbar',
+            defaultToolbar: [{
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports'],
+            scroll: true,
+            fixed: 'table'
+        })
+
+        table.on('tool(order-detail-table)', function (obj) {
+             if (obj.event === 'edit') {
+                window.edit(obj)
+            }
+        })
+
+        table.on('toolbar(order-detail-table)', function (obj) {
+            if (obj.event === 'add') {
+                window.add()
+            } else if (obj.event === 'refresh') {
+                window.refresh()
+            } else if (obj.event === 'back-button') {
+                window.history.back()
+                table.reload('order-detail-table', {
+                   url: '/system/factory/order_management/data'
+                });
+            }
+        })
+
+        form.on('submit(order-query)', function (data) {
+            table.reload('order-detail-table', {where: data.field})
+            return false
+        })
+
+        window.edit = function (obj) {
+            layer.open({
+                type: 2,
+                title: '修改',
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'edit/' + obj.data['id']
+            })
+        }
+
+        window.add = function (obj) {
+            layer.open({
+                type: 2,
+                title: '新增订单信息',
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'add/' + {{ order_id }}
+            })
+        }
+
+        window.refresh = function () {
+            table.reload('order-detail-table')
+        }
+    })
+</script>
+</html>

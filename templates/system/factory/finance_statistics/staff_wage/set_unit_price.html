@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>财务统计-员工工资-设置烫工单价</title>
+    {% include 'system/common/header.html' %}
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">原单价：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {% if orders.sew_unit_price %}{{ orders.sew_unit_price }}{% else %}0{% endif %}元/件
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">单价：</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="sewUnitPrice" lay-verify="required"
+                               autocomplete="off" placeholder="请输入烫工单价（元/件）" class="layui-input">
+                    </div>
+                </div>
+                <br>
+                <br>
+                <br>
+                //增加该功能的注释
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit=""
+                    lay-filter="set-unit-price-update">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['form', 'jquery'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        form.on('submit(set-unit-price-update)', function (data) {
+            layer.confirm('确认将所有订单的烫工单价都设置为' + data.field.sewUnitPrice + '元/件吗？', { icon: 3, title: '提示' }, function (index) {
+                $.ajax({
+                    url: '/system/factory/finance_statistics/staff_wage/set_unit_price_update',
+                    data: JSON.stringify(data.field),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'put',
+                    success: function (result) {
+                        if (result.success) {
+                            layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
+                                parent.layer.close(parent.layer.getFrameIndex(window.name));
+                                parent.layui.table.reload('finance-staff-wage-table');
+                            });
+                        } else {
+                            layer.msg(result.msg, { icon: 2, time: 1000 });
+                        }
+                    },
+                    error: function () {
+                        layer.msg('网络或服务器错误，请稍后再试', { icon: 2, time: 1000 });
+                    }
+                });
+                return false;
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

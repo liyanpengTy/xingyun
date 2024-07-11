@@ -32,10 +32,18 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">状态</label>
                     <div class="layui-input-block">
-                        <input type="radio" name="enable" {% if role.enable == 1 %}checked {% endif %}value="1"
-                               title="开启">
-                        <input type="radio" name="enable" {% if role.enable == 0 %}checked {% endif %} value="0"
-                               title="关闭">
+                        <input type="radio" name="enable" {% if role.enable == 1 %}checked {% endif %} value="1" title="开启">
+                        <input type="radio" name="enable" {% if role.enable == 0 %}checked {% endif %} value="0" title="关闭">
+                    </div>
+                </div>
+                <div class="layui-form-item" id="roleTypeSelector">
+                    <label class="layui-form-label">角色类型</label>
+                    <div class="layui-input-block">
+                        <select name="isInternal">
+                            <option value=""></option>
+                            <option value="internal" {% if role.isInternal == "internal" %} selected{% endif %}>內部角色 </option>
+                            <option value="factory" {% if role.isInternal == "factory" %} selected{% endif %}>工厂角色 </option>
+                        </select>
                     </div>
                 </div>
                 <div class="layui-form-item">

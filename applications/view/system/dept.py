@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 
 from applications.common import curd
 from applications.common.utils import validate
-from applications.common.utils.http import success_api, fail_api
+from applications.common.utils.http import success_api, fail_api, table_api
 from applications.common.utils.rights import authorize
 from applications.common.utils.validate import str_escape
 from applications.extensions import db
@@ -21,28 +21,39 @@ def main():
 @bp.post('/data')
 @authorize("system:dept:main", log=True)
 def data():
-    data = Dept.query.order_by(Dept.sort).all()
-    res = {
-        "data": DeptSchema(many=True).dump(data)
-    }
-    return jsonify(res)
+    # 获取请求参数
+    dept_name = str_escape(request.args.get('deptName', type=str))
+    filters = []
+    if dept_name:
+        filters.append(Dept.dept_name.contains(dept_name))
+    # 将is_deleted = 1的数据排除
+    filters.append(Dept.is_deleted != 1)
+    query = db.session.query(Dept).options(
+        db.joinedload(Dept.user)
+    ).filter(*filters).all()
+    schema = DeptSchema(many=True)
+    result = schema.dump(query)
+    db.session.close()
+    return table_api(data=result)
 
 
 @bp.get('/add')
 @authorize("system:dept:add", log=True)
 def add():
-    return render_template('system/dept/add.html')
+    internal_users = db.session.query(User).filter_by(user_type='userInternal')
+    db.session.close()
+    return render_template('system/dept/add.html', internal_users=internal_users)
 
 
 @bp.get('/tree')
 @authorize("system:dept:main", log=True)
 def tree():
-    dept = Dept.query.order_by(Dept.sort).all()
+    dept = db.session.query(Dept).order_by(Dept.sort).all()
     power_data = curd.model_to_dicts(schema=DeptSchema, data=dept)
+    db.session.close()
     res = {
         "status": {"code": 200, "message": "默认"},
         "data": power_data
-
     }
     return jsonify(res)
 
@@ -54,15 +65,16 @@ def save():
     dept = Dept(
         parent_id=req_json.get('parentId'),
         dept_name=str_escape(req_json.get('deptName')),
-        sort=str_escape(req_json.get('sort')),
         leader=str_escape(req_json.get('leader')),
         phone=str_escape(req_json.get('phone')),
-        email=str_escape(req_json.get('email')),
+        user_id=int(str_escape(req_json.get('userId'))),
         status=str_escape(req_json.get('status')),
+        sort=str_escape(req_json.get('sort')),
         address=str_escape(req_json.get('address'))
     )
-    r = db.session.add(dept)
+    db.session.add(dept)
     db.session.commit()
+    db.session.close()
     return success_api(msg="成功")
 
 
@@ -78,10 +90,11 @@ def edit():
 @bp.put('/enable')
 @authorize("system:dept:edit", log=True)
 def enable():
-    id = request.get_json(force=True).get('deptId')
-    if id:
-        enable = 1
-        d = Dept.query.filter_by(id=id).update({"status": enable})
+
+    dept_id = request.get_json(force=True).get('deptId')
+    if dept_id:
+        status = 1
+        d = Dept.query.filter_by(id=dept_id).update({"status": status})
         if d:
             db.session.commit()
             return success_api(msg="启用成功")
@@ -93,10 +106,10 @@ def enable():
 @bp.put('/disable')
 @authorize("system:dept:edit", log=True)
 def dis_enable():
-    id = request.get_json(force=True).get('deptId')
-    if id:
-        enable = 0
-        d = Dept.query.filter_by(id=id).update({"status": enable})
+    dept_id = request.get_json(force=True).get('deptId')
+    if dept_id:
+        status = 0
+        d = Dept.query.filter_by(id=dept_id).update({"status": status})
         if d:
             db.session.commit()
             return success_api(msg="禁用成功")
@@ -108,9 +121,8 @@ def dis_enable():
 @authorize("system:dept:edit", log=True)
 def update():
     json = request.get_json(force=True)
-    #id = json.get("deptId"),
-    id = str_escape(json.get("deptId"))
-    data = {
+    dept_id = str_escape(json.get("deptId"))
+    get_data = {
         "dept_name": validate.str_escape(json.get("deptName")),
         "sort": validate.str_escape(json.get("sort")),
         "leader": validate.str_escape(json.get("leader")),
@@ -119,10 +131,11 @@ def update():
         "status": validate.str_escape(json.get("status")),
         "address": validate.str_escape(json.get("address"))
     }
-    d = Dept.query.filter_by(id=id).update(data)
+    d = db.session.query(Dept).filter_by(id=dept_id).update(get_data)
     if not d:
         return fail_api(msg="更新失败")
     db.session.commit()
+    db.session.close()
     return success_api(msg="更新成功")
 
 

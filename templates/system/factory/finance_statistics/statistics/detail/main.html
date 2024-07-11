@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>财务统计-收支统计-其他收入详情</title>
+    {% include 'system/common/header.html' %}</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">日期</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="startDate" class="layui-input" id="start-date" placeholder="开始日期">
+                </div>
+                <div class="layui-form-mid">-</div>
+                <div class="layui-input-inline">
+                    <input type="text" name="endDate" class="layui-input" id="end-date" placeholder="结束日期">
+                </div>
+                <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="finance-query">
+                    <i class="layui-icon layui-icon-search"></i>
+                    查询
+                </button>
+                <button type="reset" class="pear-btn pear-btn-md">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="finance-statistics-detail" lay-filter="finance-statistics-detail"></table>
+    </div>
+</div>
+</body>
+
+<script type="text/html" id="statistics-table">
+    <button lay-event="back-button" class="pear-btn gray-btn pear-btn-md">
+        <i class="layui-icon layui-icon-return"></i>
+    </button>
+</script>
+
+<script type="text/html" id="finance-bar">
+    {% if authorize("system:finance_statistics:statistics:detail:edit") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i
+                class="layui-icon"> 修改 </i>
+        </button>
+    {% endif %}
+    {% if authorize("system:finance_statistics:statistics:detail:remove") %}
+        <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i
+                class="layui-icon"> 删除 </i>
+        </button>
+    {% endif %}
+</script>
+
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['table', 'form', 'jquery', 'popup', 'common'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let popup = layui.popup;
+        let common = layui.common;
+
+        let MODULE_PATH = '/system/factory/finance_statistics/statistics/detail/'
+
+        let cols = [
+            [
+                {title: '序号', type: 'numbers', align: 'center'},
+                {title: '日期', field: 'date', align: 'center'},
+                {title: '类别/名称', field: 'category', align: 'center'},
+                {title: '数量', field: 'quantity', align: 'center'},
+                {title: '单价', field: 'unit_price', align: 'center'},
+                {title: '单位', field: 'unit', align: 'center'},
+                {title: '合计金额', field: 'amount', align: 'center'},
+                {title: '操作', toolbar: '#finance-bar', align: 'center', width: 240}
+            ]
+        ]
+
+        table.render({
+            elem: '#finance-statistics-detail',
+            url: MODULE_PATH + 'data/' + {{ income_id }},
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#statistics-table',
+            defaultToolbar: [{
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports']
+        })
+
+        table.on('tool(finance-statistics-detail)', function (obj) {
+            if (obj.event === 'edit') {
+                 window.edit(obj)
+            } else if (obj.event ==='remove') {
+                window.remove(obj)
+            }
+        })
+
+        window.edit = function (obj) {
+            layer.open({
+                type: 2,
+                title: '修改其他收入详情',
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'edit/' + obj.data['id']
+            })
+        }
+
+        window.remove = function (obj) {
+            layer.confirm('确定要删除这条记录吗？', {icon: 3, title: '提示'}, function (index) {
+                layer.close(index)
+                let loading = layer.load()
+                $.ajax({
+                    url: MODULE_PATH + 'remove/' + obj.data['id'],
+                    dataType: 'json',
+                    type: 'delete',
+                    success: function (result) {
+                        layer.close(loading)
+                        if (result.success) {
+                            popup.success(result.msg, function () {
+                                obj.del()
+                                table.reload('finance-statistics-detail')
+                            })
+                        } else {
+                            popup.failure(result.msg)
+                        }
+                    }
+                })
+            })
+        }
+
+        form.on('submit(finance-query)', function (data) {
+            table.reload('finance-statistics-detail', {where: data.field})
+            return false
+        })
+
+        table.on('toolbar(finance-statistics-detail)', function (obj) {
+            if (obj.event === 'back-button') {
+                window.history.back()
+                table.reload('finance-statistics-detail', {
+                   url: '/system/factory/finance_statistics/statistics/data'
+                });
+            }
+        })
+
+        window.refresh = function () {
+            table.reload('finance-statistics-detail')
+        }
+    })
+</script>
+<script>
+    layui.use('laydate', function () {
+        let laydate = layui.laydate;
+        let $ = layui.$;
+
+        window.onload = function() {
+            laydate.render({
+                elem: '#start-date',
+                type: 'date',
+                    done: function(value, date, endDate) {
+                    laydate.render({
+                        elem: '#end-date',
+                        type: 'date',
+                        min: value
+                    });
+                }
+            });
+            laydate.render({
+                elem: '#end-date',
+                type: 'date',
+                min: '2020-01-01'
+            });
+        }
+    });
+</script>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>订单管理-自制订单</title>
+    {% include 'system/common/header.html' %}
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">订单id</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ order.id }}" name="id" lay-verify="title"
+                               autocomplete="off" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">款号：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ order.product_model_number }}
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客户姓名：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ clients.client_name }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客户单价：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ order.order_client_unit_price }}
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">总数量：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ order.order_client_number }}
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">车位单价：</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="staffUnitPrice" lay-verify="required"
+                               autocomplete="off" placeholder="请输入给员工的单价" class="layui-input" >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit=""
+                    lay-filter="order-update">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['form', 'jquery'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        form.on('submit(order-update)', function (data) {
+            console.log(data.field);
+            $.ajax({
+                url: '/system/factory/order_management/update_abstain',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'put',
+                success: function (result) {
+                    if (result.success) {
+                        layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));
+                            parent.layui.table.reload('order-table');
+                        });
+                    } else {
+                        layer.msg(result.msg, { icon: 2, time: 1000 });
+                    }
+                },
+                error: function () {
+                    layer.msg('网络或服务器错误，请稍后再试', { icon: 2, time: 1000 });
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

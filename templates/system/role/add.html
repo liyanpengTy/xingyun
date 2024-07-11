@@ -29,6 +29,16 @@
                         <input type="radio" name="enable" value="0" title="关闭" checked>
                     </div>
                 </div>
+                <div class="layui-form-item" id="roleTypeSelector">
+                    <label class="layui-form-label">角色类型</label>
+                    <div class="layui-input-block">
+                        <select name="isInternal">
+                            <option value=""></option>
+                            <option value="internal">内部角色</option>
+                            <option value="factory">工厂角色</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">排序</label>
                     <div class="layui-input-block">
@@ -74,7 +84,7 @@
         success: function (result) {
           if (result.success) {
             layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
-              parent.layer.close(parent.layer.getFrameIndex(window.name))//关闭当前页
+              parent.layer.close(parent.layer.getFrameIndex(window.name))
               parent.layui.table.reload('role-table')
             })
           } else {

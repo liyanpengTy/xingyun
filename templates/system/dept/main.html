@@ -39,12 +39,6 @@
             新增
         </button>
     {% endif %}
-    {% if authorize("system:dept:remove") %}
-        <button class="pear-btn pear-btn-md" lay-event="batchRemove">
-            <i class="layui-icon layui-icon-delete"></i>
-            删除
-        </button>
-    {% endif %}
 </script>
 
 <script type="text/html" id="dept-bar">
@@ -95,19 +89,20 @@
                 page: false,
                 cols: [
                     [
-                        {field: 'id', title: 'id'},
-                        {field: 'dept_name', minWidth: 200, title: '部门名称'},
+                        {field: 'id', title: 'ID'},
+                        {field: 'dept_name', minWidth: 200, title: '部门/工厂名称'},
                         {field: 'leader', title: '负责人'},
-                        {field: 'phone', title: '联系方式'},
-                        {field: 'email', title: '邮箱'},
+                        {field: 'phone', title: '联系电话'},
                         {field: 'address', title: '详细地址'},
                         {field: 'status', title: '状态', templet: '#dept-status'},
+                        {field: 'user_realname', title: '推荐人', width: 100},
                         {field: 'sort', title: '排序', width: 100},
                         {title: '操作', templet: '#dept-bar', width: 120, align: 'center'}
                     ]
                 ]
-            })
-        }
+                // 其他配置...
+            });
+        };
 
         form.on('submit(dept-query)', function (data) {
             var keyword = data.field.deptName

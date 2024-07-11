@@ -11,14 +11,25 @@
     <div class="layui-card-body">
         <form class="layui-form" action="" lay-filter="user-query-form">
             <div class="layui-form-item">
-                <label class="layui-form-label">用户</label>
+                <label class="layui-form-label">姓名</label>
                 <div class="layui-input-inline">
-                    <input type="text" name="realname" placeholder="" class="layui-input">
+                    <input type="text" name="realname" placeholder="请输入姓名" class="layui-input">
                 </div>
+
                 <label class="layui-form-label">账号</label>
                 <div class="layui-input-inline">
-                    <input type="text" name="username" placeholder="" class="layui-input">
+                    <input type="text" name="username" placeholder="请输入账号" class="layui-input">
                 </div>
+
+                <label class="layui-form-label">用户类型</label>
+                <div class="layui-input-inline">
+                    <select name="userType">
+                        <option name=""></option>
+                        <option name="userInternal">内部用户</option>
+                        <option name="userExternal">外部用户</option>
+                    </select>
+                </div>
+
                 <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="user-query">
                     <i class="layui-icon layui-icon-search"></i>
                     查询
@@ -85,12 +96,20 @@
             {{# if(d.enable==1){ }} checked {{# } }} />
 </script>
 
+<script type="text/html" id="user-startTime">
+    {{layui.util.toDateString(d.start_time,  "yyyy-MM-dd")}}
+</script>
+
+<script type="text/html" id="user-endTime">
+    {{layui.util.toDateString(d.end_time,  "yyyy-MM-dd")}}
+</script>
+
 <script type="text/html" id="user-createTime">
-    {{layui.util.toDateString(d.create_at,  "yyyy-MM-dd HH:mm:ss")}}
+    {{layui.util.toDateString(d.create_at,  "yyyy-MM-dd")}}
 </script>
 
 <script type="text/html" id="user-updateTime">
-    {{layui.util.toDateString(d.update_at,  "yyyy-MM-dd HH:mm:ss")}}
+    {{layui.util.toDateString(d.update_at,  "yyyy-MM-dd")}}
 </script>
 {% endraw %}
 
@@ -111,10 +130,14 @@
                 {title: 'id', field: 'id', align: 'center'},
                 {title: '姓名', field: 'realname', align: 'center', width: 110},
                 {title: '账号', field: 'username', align: 'center'},
+                {title: '联系电话', field: 'phone', align: 'center'},
+                {title: '用户类型', field: 'user_type', align: 'center'},
                 {title: '部门', field: 'dept_name', align: 'center'},
                 {title: '启用', field: 'enable', align: 'center', templet: '#user-enable', width: 120},
-                {title: '注册时间', field: 'create_at', templet: '#user-createTime', align: 'center'},
-                {title: '更新时间', field: 'update_at', templet: '#user-updateTime', align: 'center'},
+                {title: '生效日期', field: 'start_time', templet: '#user-startTime', align: 'center'},
+                {title: '截止日期', field: 'end_time', templet: '#user-endTime', align: 'center'},
+                {title: '注册日期', field: 'create_at', templet: '#user-createTime', align: 'center'},
+                {title: '更新日期', field: 'update_at', templet: '#user-updateTime', align: 'center'},
                 {title: '操作', toolbar: '#user-bar', align: 'center', width: 180}
             ]
         ]

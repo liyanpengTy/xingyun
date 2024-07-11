@@ -10,37 +10,41 @@
         <div class="main-container">
             <div class="main-container">
                 <div class="layui-form-item">
-                    <label class="layui-form-label">上级部门</label>
+                    <label class="layui-form-label">上级</label>
                     <div class="layui-input-block">
                         <ul id="selectParent" name="parentId" class="dtree" data-id="0"></ul>
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">名称</label>
+                    <label class="layui-form-label">部门名称</label>
                     <div class="layui-input-block">
-                        <input type="text" name="deptName" lay-verify="title" autocomplete="off" placeholder="请输入标题"
-                               class="layui-input">
+                        <input type="text" name="deptName" autocomplete="off" placeholder="请输入部门/工厂名称"
+                               class="layui-input" lay-verify="required">
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">负责人</label>
                     <div class="layui-input-block">
-                        <input type="text" name="leader" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="leader" lay-verify="title" autocomplete="off" placeholder="请输入部门/工厂负责人"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">邮箱</label>
+                    <label class="layui-form-label">联系电话</label>
                     <div class="layui-input-block">
-                        <input type="text" name="email" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="phone" lay-verify="required" autocomplete="off" placeholder="请输入部门/工厂联系电话"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">联系方式</label>
+                    <label class="layui-form-label">推荐人姓名</label>
                     <div class="layui-input-block">
-                        <input type="text" name="phone" lay-verify="title" autocomplete="off" placeholder="请输入标题"
-                               class="layui-input">
+                        <select name="userId" lay-verify="title" class="layui-select">
+                            <option value="">请选择推荐人姓名</option>
+                            {% for user in internal_users %}
+                                <option value="{{ user.id }}">{{ user.realname }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
                 <div class="layui-form-item">
@@ -53,14 +57,14 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">排序</label>
                     <div class="layui-input-block">
-                        <input type="text" name="sort" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="sort" lay-verify="required" autocomplete="off" placeholder="请输入排序序号"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item layui-form-text">
                     <label class="layui-form-label">详细地址</label>
                     <div class="layui-input-block">
-                        <textarea placeholder="请输入描述" name="address" class="layui-textarea"></textarea>
+                        <textarea placeholder="请输入详细地址" name="address" class="layui-textarea"></textarea>
                     </div>
                 </div>
             </div>

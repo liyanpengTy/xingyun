@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>财务统计-客户回款-详情（协作客户）</title>
+    {% include 'system/common/header.html' %}</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">日期</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="startDate" class="layui-input" id="start-date" placeholder="开始日期">
+                </div>
+                <div class="layui-form-mid">-</div>
+                <div class="layui-input-inline">
+                    <input type="text" name="endDate" class="layui-input" id="end-date" placeholder="结束日期">
+                </div>
+                <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="finance-query">
+                    <i class="layui-icon layui-icon-search"></i>
+                    查询
+                </button>
+                <button type="reset" class="pear-btn pear-btn-md">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="finance-client-detail-partner-table" lay-filter="finance-client-detail-partner-table"></table>
+    </div>
+</div>
+</body>
+
+<script type="text/html" id="partner-client-table">
+    <button lay-event="back-button" class="pear-btn gray-btn pear-btn-md">
+        <i class="layui-icon layui-icon-return"></i>
+    </button>
+</script>
+
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['table', 'form', 'jquery', 'popup', 'common'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let popup = layui.popup;
+        let common = layui.common;
+
+        let MODULE_PATH = '/system/factory/finance_statistics/client_payment/detail/partner_client/'
+
+        let cols = [
+            [
+                {title: '序号', type: 'numbers', align: 'center'},
+                {title: '日期', field: 'date', align: 'center'},
+                {title: '款号', field: 'contract_no', align: 'center'},
+                {title: '协作数量', field: 'outsource_client_number', align: 'center'},
+                {title: '协作单价', field: 'outsource_unit_price', align: 'center'},
+                {title: '合计金额', field: 'amount', align: 'center'},
+            ]
+        ]
+
+        table.render({
+            elem: '#finance-client-detail-partner-table',
+            url: MODULE_PATH + 'data_partner_client/' + {{ finance_client_id }},
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#partner-client-table',
+            defaultToolbar: [{
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports']
+        })
+
+
+        form.on('submit(finance-query)', function (data) {
+            table.reload('finance-client-detail-partner-table', {where: data.field})
+            return false
+        })
+
+        table.on('toolbar(finance-client-detail-partner-table)', function (obj) {
+            if (obj.event === 'back-button') {
+                window.history.back()
+            }
+        })
+
+        window.refresh = function () {
+            table.reload('finance-client-detail-partner-table')
+        }
+    })
+</script>
+<script>
+    layui.use('laydate', function () {
+        let laydate = layui.laydate;
+        let $ = layui.$;
+
+        window.onload = function() {
+            laydate.render({
+                elem: '#start-date',
+                type: 'date',
+                    done: function(value, date, endDate) {
+                    laydate.render({
+                        elem: '#end-date',
+                        type: 'date',
+                        min: value
+                    });
+                }
+            });
+            laydate.render({
+                elem: '#end-date',
+                type: 'date',
+                min: '2020-01-01'
+            });
+        }
+    });
+</script>
+</html>

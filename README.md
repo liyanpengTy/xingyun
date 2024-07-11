@@ -5,7 +5,7 @@
     Pear Admin Flask
   </h1>
   <h4 align="center">
-    开 箱 即 用 的 Flask 快 速 开 发 平 台
+    开 箱 即 用 的 Flask 快 速 开 发 平 台。 二 次 开 发
   </h4>
 
   [预览](http://flask.pearadmin.com:8000)   |   [官网](http://www.pearadmin.com/)   |   [群聊](docs/assets/qqgroup.jpg)   |   [文档](docs/detail.md)

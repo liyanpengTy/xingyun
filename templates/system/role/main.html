@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>用户管理</title>
+    <title>角色管理</title>
     {% include 'system/common/header.html' %}</head>
 <body class="pear-container">
 <div class="layui-card">
@@ -83,6 +83,7 @@
                 {title: 'Key值', field: 'code', align: 'center'},
                 {title: '描述', field: 'details', align: 'center'},
                 {title: '是否可用', field: 'enable', align: 'center', templet: '#role-enable'},
+                {title: '角色类型', field: 'isInternal', align: 'center'},
                 {title: '排序', field: 'sort', align: 'center'},
                 {title: '操作', toolbar: '#role-bar', align: 'center', width: 240}
             ]

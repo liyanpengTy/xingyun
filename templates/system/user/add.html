@@ -12,35 +12,75 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">账号</label>
                     <div class="layui-input-block">
-                        <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="username" lay-verify="title" autocomplete="off" placeholder="请输入账号"
                                class="layui-input">
                     </div>
                 </div>
+
                 <div class="layui-form-item">
                     <label class="layui-form-label">姓名</label>
                     <div class="layui-input-block">
-                        <input type="text" name="realName" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="realName" lay-verify="title" autocomplete="off" placeholder="请输入姓名"
                                class="layui-input">
                     </div>
                 </div>
+
                 <div class="layui-form-item">
                     <label class="layui-form-label">密码</label>
                     <div class="layui-input-block">
-                        <input type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入标题"
+                        <input type="text" name="password" lay-verify="title" autocomplete="off" placeholder="请输入密码"
                                class="layui-input">
                     </div>
                 </div>
 
                 <div class="layui-form-item">
-                    <label class="layui-form-label">角色</label>
+                    <label class="layui-form-label">联系电话</label>
                     <div class="layui-input-block">
+                        <input type="text" name="phone" lay-verify="title" autocomplete="off" placeholder="请输入联系电话" class="layui-input">
+                    </div>
+                </div>
 
-                        {% for role in roles %}
-                            <input
-                                    value="{{ role.id }}" title="{{ role.name }}" type="checkbox"
-                                    name="roleIds" lay-skin="primary">
-                        {% endfor %}
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户类型</label>
+                    <div class="layui-input-block">
+                        <input type="radio" lay-filter="userType" name="userType" value="userInternal" title="内部用户" >
+                        <input type="radio" lay-filter="userType" name="userType" value="userExternal" title="外部用户" checked>
+                    </div>
+                </div>
 
+                <div class="layui-form-item">
+                    <label class="layui-form-label">是否启用</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="enable" value="1" title="开启" checked>
+                        <input type="radio" name="enable" value="0" title="关闭">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户角色</label>
+                    <div class="layui-input-block">
+                        <select name="roleId" lay-verify="required">
+                            <option value="">请选择角色</option>
+
+                            {% for role in roles %}
+                                <option value="{{ role.id }}">{{ role.name }}</option>
+                            {% endfor %}
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-form-item" id="startTimeItem">
+                    <label class="layui-form-label">生效日期</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="start_time" name="start_time" class="layui-input" placeholder="请选择开始时间">
+                    </div>
+                </div>
+
+                <div class="layui-form-item" id="endTimeItem">
+                    <label class="layui-form-label">截止日期</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="end_time" name="end_time" class="layui-input" placeholder="请选择结束时间">
                     </div>
                 </div>
             </div>
@@ -64,6 +104,20 @@
   layui.use(['form', 'jquery'], function () {
     let form = layui.form
     let $ = layui.jquery
+
+
+    form.on('radio(userType)', function () {
+            if (this.value == 'userInternal') {
+                $('#startTimeItem').hide()
+                $('#endTimeItem').hide()
+                $('#startTimeItem').val('')
+                $('#endTimeItem').val('')
+            } else if (this.value == 'userExternal') {
+                $('#startTimeItem').show()
+                $('#endTimeItem').show()
+            }
+        })
+
     form.on('submit(user-save)', function (data) {
       let roleIds = ''
       $('input[type=checkbox]:checked').each(function () {
@@ -94,6 +148,46 @@
   })
 </script>
 <script>
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        var $ = layui.$;
+
+        // 初始化开始时间选择器
+        laydate.render({
+            elem: '#start_time',
+            type: 'date',
+            format: 'yyyy-MM-dd HH:mm:ss',
+            done: function(value, date, endDate){
+                console.log('开始时间选择的日期是：', value);
+            }
+        });
+
+        // 初始化结束时间选择器
+        laydate.render({
+            elem: '#end_time',
+            type: 'date',
+            format: 'yyyy-MM-dd HH:mm:ss',
+            done: function(value, date, endDate){
+                console.log('结束时间选择的日期是：', value);
+            }
+        });
+
+        // 监听文档的双击事件
+        $(document).dblclick(function(e){
+            var target = $(e.target);
+            // 检查双击事件是否发生在日历元素上
+            // 这里需要一个能够区分日历元素的选择器，例如日历元素的类名
+            // 假设日历元素的类名为 '.laydate-day'，你需要根据实际情况来确定
+            if(target.hasClass('laydate-day') && !target.hasClass('laydate-disabled')){
+                var date = target.text(); // 假定日历元素的文本是日期
+                // 将选择的日期设置到对应的输入框中
+                // 这里需要定位到对应的输入框，可能需要根据实际情况调整选择器
+                var input = target.closest('.laydate').prev();
+                laydate.now(new Date(date));
+                input.val(date); // 设置输入框的值
+            }
+        });
+    });
 </script>
 </body>
 </html>

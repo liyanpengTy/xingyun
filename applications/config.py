@@ -2,13 +2,13 @@ import logging
 from datetime import timedelta
 
 
-# from urllib.parse import quote_plus as urlquote
+from urllib.parse import quote_plus as urlquote
 
 
 class BaseConfig:
     SUPERADMIN = 'admin'
 
-    SYSTEM_NAME = 'Pear Admin'
+    SYSTEM_NAME = 'Xingyun Technology'
     # 主题面板的链接列表配置
     SYSTEM_PANEL_LINKS = [
         {
@@ -35,21 +35,21 @@ class BaseConfig:
     # JSON配置
     JSON_AS_ASCII = False
 
-    SECRET_KEY = "pear-system-flask"
+    SECRET_KEY = "94e7723f1300ca5d97fd1481a6c47bf2df24209bb03f7a001a3d48df85ac2b12"
 
     # mysql 配置
-    # MYSQL_USERNAME = "root"
-    # MYSQL_PASSWORD = "123456"
-    # MYSQL_HOST = "127.0.0.1"
-    # MYSQL_PORT = 3306
-    # MYSQL_DATABASE = "PearAdminFlask"
+    MYSQL_USERNAME = "root"
+    MYSQL_PASSWORD = "root"
+    MYSQL_HOST = "127.0.0.1"
+    MYSQL_PORT = 3306
+    MYSQL_DATABASE = "xingyun_system"
 
     # 数据库的配置信息
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///../pear.db'
-    # SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{MYSQL_USERNAME}:{urlquote(MYSQL_PASSWORD)}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}?charset=utf8mb4"
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///../pear.db'
+    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{MYSQL_USERNAME}:{urlquote(MYSQL_PASSWORD)}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}?charset=utf8mb4"
 
     # 默认日志等级
-    LOG_LEVEL = logging.WARN
+    LOG_LEVEL = logging.DEBUG
     """
     flask-mail配置
     """
@@ -57,8 +57,8 @@ class BaseConfig:
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
     MAIL_PORT = 465
-    MAIL_USERNAME = '123@qq.com'
-    MAIL_PASSWORD = 'XXXXX'  # 生成的授权码
+    MAIL_USERNAME = '2823921383@qq.com'
+    MAIL_PASSWORD = 'xzzx1221'  # 生成的授权码
     MAIL_DEFAULT_SENDER = MAIL_USERNAME
 
     # 插件配置，填写插件的文件名名称，默认不启用插件。

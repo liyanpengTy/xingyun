@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>裁床管理-新增裁床单</title>
+    {% include 'system/common/header.html' %}</head>
+<body>
+    <form class="layui-form" action="" id="cutting-form">
+        <div class="mainBox">
+            <div class="main-container">
+                <div class="main-container">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">款号</label>
+                        <div class="layui-input-block">
+                            <select name="orderId" lay-verify="required" placeholder="" class="layui-select">
+                                <option value="">请选择款号</option>
+                                {% for order in orders %}
+                                <option value="{{ order.id }}">{{ order.product_model_number }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">床次</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="bedNumber" lay-verify="required" autocomplete="off"
+                                   placeholder="请输入床次号" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">裁货人员</label>
+                        <div class="layui-input-block">
+                            <select name="staffId" lay-verify="required" placeholder="" class="layui-select">
+                                <option value="">请选择裁床人员</option>
+                                {% for staff in staffs %}
+                                <option value="{{ staff.id }}">{{ staff.staff_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">是否关联</label>
+                        <div class="layui-input-block">
+                            <input type="radio" lay-filter="isBed" name="isBed" value="1" title="是" checked>
+                            <input type="radio" lay-filter="isBed" name="isBed" value="0" title="否" >
+                        </div>
+                    </div>
+                    <div class="layui-form-item" id="bedNumber">
+                        <label class="layui-form-label">关联床次</label>
+                        <div class="layui-input-block">
+                            <select name="parentLevelNumber" class="layui-select" lay-filter="bedSelect">
+                                <option value="">请选择关联床次</option>
+                                {% for cutting_bed in cutting_beds %}
+                                <option value="{{ cutting_bed.bed_number }}" data-id="{{ cutting_bed.id }}">{{ cutting_bed.bed_number }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden" name="parentLevelId" id="parentLevelId" value="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bottom">
+            <div class="button-container">
+                <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit="" lay-filter="cutting-save">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button type="reset" class="pear-btn pear-btn-sm">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {% include 'system/common/footer.html' %}
+    <script>
+        layui.use(['form', 'jquery'], function () {
+            let form = layui.form;
+            let $ = layui.jquery;
+
+            form.on('radio(isBed)', function () {
+                if (this.value == '0') {
+                    $('#bedNumber').hide().val('')
+                } else if (this.value == '1') {
+                    $('#bedNumber').show()
+                }
+            });
+
+            //给隐藏域赋值： <input type="hidden" name="parentLevelId" id="parentLevelId" value="">
+            form.on('select(bedSelect)', function (data) {
+                var dataId = $(data.elem).find(':selected').data('id');
+                $('#parentLevelId').val(dataId);
+            });
+
+
+            form.on('submit(cutting-save)', function (data) {
+                console.log(data.field);
+                $.ajax({
+                    url: '/system/factory/cutting_bed_management/save',
+                    data: JSON.stringify(data.field),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    type: 'post',
+                    success: function (result) {
+                        if (result.success) {
+                            layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
+                                parent.layer.close(parent.layer.getFrameIndex(window.name));
+                                parent.layui.table.reload('cutting-table');
+                            });
+                        } else {
+                            layer.msg(result.msg, { icon: 2, time: 1000 });
+                        }
+                    },
+                    error: function () {
+                        layer.msg('网络或服务器错误，请稍后再试', { icon: 2, time: 1000 });
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+</body>
+</html>

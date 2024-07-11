@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>财务统计-其他开销</title>
+    {% include 'system/common/header.html' %}</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">年月</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="yearMonth" id="yearMonth" placeholder="请选择年月" autocomplete="off"
+                           class="layui-input">
+                </div>
+                <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="finance-query">
+                    <i class="layui-icon layui-icon-search"></i>
+                    查询
+                </button>
+                <button type="reset" class="pear-btn pear-btn-md">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="other-table" lay-filter="other-table"></table>
+    </div>
+</div>
+</body>
+
+<script type="text/html" id="finance-other-table">
+    {% if authorize("system:finance_statistics:other_expenses:add") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="add"><i
+                class="layui-icon"> 新增 </i>
+        </button>
+    {% endif %}
+</script>
+
+<script type="text/html" id="finance-bar">
+    {% if authorize("system:finance_statistics:other_expenses:detail") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="detail"><i
+                class="layui-icon"> 详细 </i>
+        </button>
+    {% endif %}
+</script>
+
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['table', 'form', 'jquery', 'popup', 'common'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let popup = layui.popup;
+        let common = layui.common;
+
+        let MODULE_PATH = '/system/factory/finance_statistics/other_expenses/'
+
+        let cols = [
+            [
+                {title: '序号', type: 'numbers', align: 'center'},
+                {title: '年份', field: 'year', align: 'center'},
+                {title: '月份', field: 'month', align: 'center'},
+                {title: '明细数量', field: 'detail_count', align: 'center'},
+                {title: '总金额', field: 'total_amount', align: 'center'},
+                {title: '操作', toolbar: '#finance-bar', align: 'center', width: 240}
+            ]
+        ]
+
+        table.render({
+            elem: '#other-table',
+            url: MODULE_PATH + 'data',
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#finance-other-table',
+            defaultToolbar: [{
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports']
+        })
+
+        table.on('tool(other-table)', function (obj) {
+            if (obj.event === 'detail') {
+                 window.location.href = '/system/factory/finance_statistics/other_expenses/detail/' + obj.data['id']
+            }
+        })
+
+        table.on('toolbar(other-table)', function (obj) {
+            if (obj.event === 'add') {
+                window.add(obj)
+            }
+        })
+
+        form.on('submit(finance-query)', function (data) {
+            table.reload('other-table', {where: data.field})
+            return false
+        })
+
+        window.add = function (obj) {
+            layer.open({
+                type: 2,
+                title: '新增其他开销',
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'add'
+            })
+        }
+
+        window.refresh = function () {
+            table.reload('other-table')
+        }
+    })
+</script>
+<script>
+    layui.use('laydate', function () {
+        let laydate = layui.laydate;
+        let $ = layui.$;
+
+        laydate.render({
+            elem: '#yearMonth',
+            type: 'month',
+        });
+
+        $(document).dblclick(function(e){
+            var target = $(e.target);
+            if(target.hasClass('laydate-day') && !target.hasClass('laydate-disabled')){
+                var date = target.text();
+                var input = target.closest('.laydate').prev();
+                laydate.now(new Date(date));
+                input.val(date);
+            }
+        });
+    });
+</script>
+</html>

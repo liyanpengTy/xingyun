@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>客户管理-新增客户</title>
+    {% include 'system/common/header.html' %}</head>
+<body>
+<form class="layui-form" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客户姓名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="clientName" lay-verify="required" autocomplete="off" placeholder="请输入客户姓名"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">联系电话</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="clientPhone" lay-verify="required" autocomplete="off" placeholder="请输入联系电话"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客户类型</label>
+                    <div class="layui-input-block">
+                        <input type="radio" lay-filter="clientType" name="clientType" value="orderClient" title="订单客户" checked>
+                        <input type="radio" lay-filter="clientType" name="clientType" value="externalClient" title="外发客户" >
+                        <input type="radio" lay-filter="clientType" name="clientType" value="partnerClient" title="协作客户" >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit="" lay-filter="client-save">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+{% include 'system/common/footer.html' %}
+<script>
+  layui.use(['form', 'jquery'], function () {
+    let form = layui.form
+    let $ = layui.jquery
+
+    form.on('submit(client-save)', function (data) {
+      $.ajax({
+        url: '/system/factory/client_management/save',
+        data: JSON.stringify(data.field),
+        dataType: 'json',
+        contentType: 'application/json',
+        type: 'post',
+        success: function (result) {
+          if (result.success) {
+            layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
+              parent.layer.close(parent.layer.getFrameIndex(window.name))
+              parent.layui.table.reload('client-table')
+            })
+          } else {
+            layer.msg(result.msg, { icon: 2, time: 1000 })
+          }
+        }
+      })
+      return false
+    })
+  })
+</script>
+</body>
+</html>

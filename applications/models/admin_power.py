@@ -7,7 +7,7 @@ class Power(db.Model):
     id = db.Column(db.Integer, primary_key=True, comment='权限编号')
     name = db.Column(db.String(255), comment='权限名称')
     type = db.Column(db.String(1), comment='权限类型')
-    code = db.Column(db.String(30), comment='权限标识')
+    code = db.Column(db.String(100), comment='权限标识')
     url = db.Column(db.String(255), comment='权限路径')
     open_type = db.Column(db.String(10), comment='打开方式')
     parent_id = db.Column(db.Integer, comment='父类编号')

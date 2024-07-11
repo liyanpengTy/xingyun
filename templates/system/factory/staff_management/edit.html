@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>员工管理-修改员工信息</title>
+    {% include 'system/common/header.html' %}
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">员工id</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ staff.id }}" name="staffId" lay-verify="title"
+                               autocomplete="off" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">姓名</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ staff.staff_name }}" name="staffName" lay-verify="required"
+                               autocomplete="off" placeholder="请输入员工姓名" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">手机号</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ staff.staff_phone }}" name="staffPhone" lay-verify="required"
+                               autocomplete="off" placeholder="请输入联系电话" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">性别</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="gender" value="true" title="男"
+                               {% if staff.gender == 1 %}checked{% endif %}>
+                        <input type="radio" name="gender" value="false" title="女"
+                               {% if staff.gender == 0 %}checked{% endif %}>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">职位</label>
+                    <div class="layui-input-block">
+                        <select name="roleId" lay-verify="required">
+                            <option value="">请选择职位</option>
+                            {% for role in roles %}
+                                <option value="{{ role.id }}" {% if role.id == current_role_id %}selected{% endif %}>{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">薪资类型</label>
+                    <div class="layui-input-block">
+                        <select name="salaryType" lay-filter="salaryTypeFilter">
+                            <option value="">请选择</option>
+                            <option value="fixed" {% if salary_type == 'fixed' %}selected{% endif %}>固定薪资</option>
+                            <option value="base_plus_commission" {% if salary_type == 'base_plus_commission' %}selected{% endif %}>底薪+提成</option>
+                            <option value="piecework" {% if salary_type == 'piecework' %}selected{% endif %}>计件</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="fixedSalaryDiv" style="display: none;">
+                    <label class="layui-form-label">固定薪资</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ staff.base_salary }}" name="fixed" autocomplete="off" placeholder="请输入固定薪资"
+                               class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item" id="baseSalaryDiv" style="display: none;">
+                    <label class="layui-form-label">底薪</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ staff.base_salary }}"  name="base" autocomplete="off" placeholder="请输入底薪"
+                               class="layui-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit=""
+                    lay-filter="staff-update">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['form', 'jquery'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        $(document).ready(function() {
+            var salaryType = '{{ staff.salary_type }}';
+            if (salaryType === 'fixed') {
+                $('#fixedSalaryDiv').show();
+                form.render('select');
+            } else if (salaryType === 'base_plus_commission') {
+                $('#baseSalaryDiv').show();
+                form.render('select');
+            }
+        });
+
+        form.on('select(salaryTypeFilter)', function (data){
+            var value = data.value;
+            $('#fixedSalaryDiv').hide();
+            $('#baseSalaryDiv').hide();
+            if (value === 'fixed') {
+                $('#fixedSalaryDiv').show();
+            } else if (value === 'base_plus_commission') {
+                $('#baseSalaryDiv').show();
+            }
+        })
+
+        form.on('submit(staff-update)', function (data) {
+            console.log(data.field);
+            $.ajax({
+                url: '/system/factory/staff_management/update',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'put',
+                success: function (result) {
+                    if (result.success) {
+                        layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));
+                            parent.layui.table.reload('staff-table');
+                        });
+                    } else {
+                        layer.msg(result.msg, { icon: 2, time: 1000 });
+                    }
+                },
+                error: function () {
+                    layer.msg('网络或服务器错误，请稍后再试', { icon: 2, time: 1000 });
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

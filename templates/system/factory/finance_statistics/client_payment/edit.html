@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>客户回款-设置</title>
+    {% include 'system/common/header.html' %}
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="mainBox">
+        <div class="main-container">
+            <div class="main-container">
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">id</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ finance_client.id }}" name="financeClientId" lay-verify="title"
+                               autocomplete="off" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">客户id</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ client.id }}" name="clientId" lay-verify="title"
+                               autocomplete="off" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-hide">
+                    <label class="layui-form-label">客户属性</label>
+                    <div class="layui-input-block">
+                        <input type="text" value="{{ client.client_type }}" name="clientType" lay-verify="title"
+                               autocomplete="off" placeholder="" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客户姓名：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ client.client_name }}
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">客户属性：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ client.client_type }}
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">年月：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ finance_client.year }}年{{ finance_client.month }}月
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="account-receivable">
+                    <label class="layui-form-label">应收款：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ finance_client.receivable }}/元
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="payment-has-been-received">
+                    <label class="layui-form-label">已收款：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {% if finance_client.received is none %}
+                                {{ 0 }}/元
+                            {% else %}
+                                {{ finance_client.received }}/元
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="payment">
+                    <label class="layui-form-label">付款金额：</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="received"
+                             autocomplete="off" placeholder="请输入付款金额（元）" class="layui-input">
+                        <span style="color: #FF5722;">（注：请输入整数或小数，不支持负数）</span>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="account-payable">
+                    <label class="layui-form-label">应付款：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {{ finance_client.payable }}/元
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="paid">
+                    <label class="layui-form-label">已付款：</label>
+                    <div class="layui-input-block">
+                        <div class="layui-input-inline" style="border:none; box-shadow:none; padding: 10px;">
+                            {% if finance_client.paid is none %}
+                                {{ 0 }}/元
+                            {% else %}
+                                {{ finance_client.paid }}/元
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="pay">
+                    <label class="layui-form-label">付款金额：</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="paid" value="0"
+                             autocomplete="off" placeholder="请输入付款金额（元）" class="layui-input">
+                        <span style="color: #FF5722;">（注：请输入整数或小数，不支持负数）</span>
+                    </div>
+                </div>
+                <br>
+                <span style="color: #FF5722;">说明1：设置已收款和已付款金额时，可直接输入一笔金额。</span>
+                <br>
+                <span style="color: #FF5722;">说明2：系统会根据由远至近的时间顺序，自动计算每个月的已收款和已付款金额。</span>
+                <br>
+                <span style="color: #FF5722;">说明3：若输入的金额大于该客户的应收款或应付款金额时，系统会给出相应的提示信息。</span>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="button-container">
+            <button type="submit" class="pear-btn pear-btn-primary pear-btn-sm" lay-submit=""
+                    lay-filter="finance-client-update">
+                <i class="layui-icon layui-icon-ok"></i>
+                提交
+            </button>
+            <button type="reset" class="pear-btn pear-btn-sm">
+                <i class="layui-icon layui-icon-refresh"></i>
+                重置
+            </button>
+        </div>
+    </div>
+</form>
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['form', 'jquery'], function () {
+        let form = layui.form;
+        let $ = layui.jquery;
+
+        $(document).ready(function () {
+            let clientType = "{{ client.client_type }}";
+            if (clientType === "订单客户") {
+                $('#account-receivable').show();
+                $('#payment-has-been-received').show();
+                $('#payment').show();
+                $('#account-payable').hide();
+                $('#paid').hide();
+                $('#pay').hide();
+            } else if (clientType === "外发客户" || clientType === "协作客户") {
+                $('#account-receivable').hide();
+                $('#payment-has-been-received').hide();
+                $('#payment').hide();
+                $('#account-payable').show();
+                $('#paid').show();
+                $('#pay').show();
+            }
+        })
+
+        form.on('submit(finance-client-update)', function (data) {
+            $.ajax({
+                url: '/system/factory/finance_statistics/client_payment/set_update',
+                data: JSON.stringify(data.field),
+                dataType: 'json',
+                contentType: 'application/json',
+                type: 'put',
+                success: function (result) {
+                    if (result.success) {
+                        layer.msg(result.msg, { icon: 1, time: 1000 }, function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));
+                            parent.layui.table.reload('other-table');
+                        });
+                    } else {
+                        layer.msg(result.msg, { icon: 2, time: 1000 });
+                    }
+                },
+                error: function () {
+                    layer.msg('网络或服务器错误，请稍后再试', { icon: 2, time: 1000 });
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

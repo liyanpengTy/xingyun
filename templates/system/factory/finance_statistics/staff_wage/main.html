@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>员工管理</title>
+    {% include 'system/common/header.html' %}</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">员工姓名</label>
+                <div class="layui-input-inline">
+                    <select name="staffId">
+                        <option value="">请选择员工姓名</option>
+                        {% for staff in staffs %}
+                            <option value="{{ staff.id }}">{{ staff.staff_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <label class="layui-form-label">职位</label>
+                <div class="layui-input-inline">
+                    <select name="roleId">
+                        <option value="">请选择职位</option>
+                        {% for role in roles %}
+                            <option value="{{ role.id }}">{{ role.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <label class="layui-form-label">年月</label>
+
+                <div class="layui-input-inline">
+                    <input type="text" name="yearMonth" id="yearMonth" placeholder="请选择年月" autocomplete="off"
+                           class="layui-input">
+                </div>
+                <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="finance-staff-wage-query">
+                    <i class="layui-icon layui-icon-search"></i>
+                    查询
+                </button>
+                <button type="reset" class="pear-btn pear-btn-md">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="finance-staff-wage-table" lay-filter="finance-staff-wage-table"></table>
+    </div>
+</div>
+</body>
+
+<script type="text/html" id="finance-staff-wage-toolbar">
+    {% if authorize("system:finance_statistics:staff_wage:add") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="add"><i
+                class="layui-icon"> 生成上月工资数据 </i>
+        </button>
+    {% endif %}
+    {% if authorize("system:finance_statistics:staff_wage:subsidy") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="subsidy"><i
+                class="layui-icon"> 设置补助 </i>
+        </button>
+    {% endif %}
+    {% if authorize("system:finance_statistics:staff_wage:set_unit_price") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="set_unit_price"><i
+                class="layui-icon"> 设置烫工单价 </i>
+        </button>
+    {% endif %}
+</script>
+
+<script type="text/html" id="finance-bar">
+    {% if authorize("system:finance_statistics:staff_wage:edit") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i
+                class="layui-icon"> 修改 </i>
+        </button>
+    {% endif %}
+    {% if authorize("system:finance_statistics:staff_wage:performance") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="performance"><i
+                class="layui-icon"> 绩效 </i>
+        </button>
+    {% endif %}
+    {% if authorize("system:finance_statistics:staff_wage:detail") %}
+        <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="detail"><i
+                class="layui-icon"> 详细 </i>
+        </button>
+    {% endif %}
+</script>
+
+{% include 'system/common/footer.html' %}
+<script>
+    layui.use(['table', 'form', 'jquery', 'popup', 'common'], function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let popup = layui.popup;
+        let common = layui.common;
+
+        let MODULE_PATH = '/system/factory/finance_statistics/staff_wage/'
+
+        let cols = [
+            [
+                {title: '序号', type: 'numbers', align: 'center'},
+                {title: '年份', field: 'year', align: 'center'},
+                {title: '月份', field: 'month', align: 'center'},
+                {title: '姓名', field: 'staff_name', align: 'center'},
+                {title: '职位', field: 'role_name', align: 'center'},
+                {title: '薪资类型', field: 'salary_type', align: 'center'},
+                {title: '基本工资', field: 'piece_work_salary', align: 'center'},
+                {title: '绩效工资', field: 'performance_salary', align: 'center'},
+                {title: '房租补助', field: 'rent_subsidy', align: 'center',},
+                {title: '生活补助', field: 'life_subsidy', align: 'center'},
+                {title: '其它补助', field: 'other_subsidy', align: 'center'},
+                {title: '应发工资', field: 'salary', align: 'center'},
+                {title: '预支工资', field: 'advance_salary', align: 'center'},
+                {title: '其它扣除', field: 'other_deduction', align: 'center'},
+                {title: '实发工资', field: 'actual_salary', align: 'center'},
+                {title: '操作', toolbar: '#finance-bar', align: 'center', width: 240}
+            ]
+        ]
+
+        table.render({
+            elem: '#finance-staff-wage-table',
+            url: MODULE_PATH + 'data',
+            page: true,
+            cols: cols,
+            skin: 'line',
+            toolbar: '#finance-staff-wage-toolbar',
+            defaultToolbar: [{
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'print', 'exports']
+        })
+
+        table.on('tool(finance-staff-wage-table)', function (obj) {
+            var data = obj.data;
+            var salaryType = data.salary_type;
+            if (obj.event === 'edit') {
+                window.edit(obj)
+            } else if (obj.event === 'detail') {
+                if (salaryType === '计件') {
+                 window.location.href = '/system/factory/finance_statistics/staff_wage/detail/piecework/' + obj.data['id']
+                } else if (salaryType === '固定薪资') {
+                    layer.msg('暂不支持固定薪资工资明细')
+                } else if (salaryType === '底薪+提成') {
+                    window.location.href = '/system/factory/finance_statistics/staff_wage/detail/base_plus_commission/' + obj.data['id']
+                }
+            } else if (obj.event === 'performance') {
+                if (salaryType === '计件') {
+                    layer.msg('暂不支持薪资类型为“计件”的绩效录入')
+                } else if (salaryType === '固定薪资') {
+                    layer.msg('暂不支持薪资类型为“固定薪资”的绩效录入')
+                } else if (salaryType === '底薪+提成') {
+                    window.performance(obj)
+                }
+            }
+        })
+
+        table.on('toolbar(finance-staff-wage-table)', function (obj) {
+            if (obj.event === 'add') {
+                window.add(obj)
+            } else if (obj.event === 'refresh') {
+                window.refresh()
+            } else if (obj.event ==='subsidy') {
+                window.subsidy(obj)
+            } else if (obj.event ==='set_unit_price') {
+                window.set_unit_price(obj)
+            }
+        })
+
+        form.on('submit(finance-staff-wage-query)', function (data) {
+            table.reload('finance-staff-wage-table', {where: data.field})
+            return false
+        })
+
+        window.edit = function (obj) {
+            layer.open({
+                type: 2,
+                title: '修改--' + obj.data['staff_name'],
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'edit/' + obj.data['id']
+            })
+        }
+
+        window.subsidy = function (obj) {
+            layer.open({
+                type: 2,
+                title: '统一设置补助金额',
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'subsidy'
+            })
+        }
+
+        window.performance = function (obj) {
+            layer.open({
+                type: 2,
+                title: '绩效录入--' + obj.data['staff_name'],
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'performance/' + obj.data['id']
+            })
+        }
+
+        window.set_unit_price = function (obj) {
+            layer.open({
+                type: 2,
+                title: '设置烫工单价',
+                shade: 0.1,
+                area: ['500px', '500px'],
+                content: MODULE_PATH + 'set_unit_price'
+            })
+        }
+
+        window.add = function (obj) {
+            layer.confirm('确定要生成上月工资数据？', {icon: 3, title: '提示'}, function (index) {
+                layer.close(index)
+                let loading = layer.load()
+                $.ajax({
+                    url: MODULE_PATH + 'save',
+                    dataType: 'json',
+                    type: 'post',
+                    success: function (result) {
+                        layer.close(loading)
+                        if (result.success) {
+                            layer.msg(result.msg, {icon: 1, time: 1000}, function () {
+                                table.reload('finance-staff-wage-table')
+                            })
+                        } else {
+                            layer.msg(result.msg, {icon: 2, time: 1000})
+                        }
+                    }
+                })
+            })
+        }
+
+        window.refresh = function () {
+            table.reload('finance-staff-wage-table')
+        }
+    })
+</script>
+<script>
+    layui.use('laydate', function () {
+        let laydate = layui.laydate;
+        let $ = layui.$;
+
+        laydate.render({
+            elem: '#yearMonth',
+            type: 'month',
+        });
+
+        $(document).dblclick(function(e){
+            var target = $(e.target);
+            if(target.hasClass('laydate-day') && !target.hasClass('laydate-disabled')){
+                var date = target.text();
+                var input = target.closest('.laydate').prev();
+                laydate.now(new Date(date));
+                input.val(date);
+            }
+        });
+    });
+</script>
+</html>
