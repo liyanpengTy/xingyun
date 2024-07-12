@@ -10,7 +10,6 @@ from marshmallow import fields
 
 class FactoryStaffSchema(SQLAlchemyAutoSchema):
     role_name = fields.String(attribute='role.name')
-
     class Meta:
         model = FactoryStaff
         include_fk = True
@@ -18,5 +17,5 @@ class FactoryStaffSchema(SQLAlchemyAutoSchema):
         include_relationships = True
         fields = [
             "id", "staff_name", "work_number", "gender", "staff_phone", "role_name",
-            "salary_type", "base_salary", "staff_status"
+            "salary_type", "base_salary", "enable"
         ]
