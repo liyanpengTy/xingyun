@@ -101,7 +101,7 @@ def add():
         FactoryStaff.dept_id == dept_id,
         FactoryStaff.is_deleted == 0,
         FactoryStaff.role_id == role_id,
-        FactoryStaff.staff_status == 'active'
+        FactoryStaff.enable == 1
     ).all()
 
     cutting_beds = db.session.query(FactoryCuttingBed).filter(
@@ -193,7 +193,7 @@ def edit(cutting_id):
         FactoryStaff.dept_id == dept_id,
         FactoryStaff.is_deleted == 0,
         FactoryStaff.role_id == role_id,
-        FactoryStaff.staff_status == 'active'
+        FactoryStaff.enable == 1
     ).all()
 
     cutting_beds = db.session.query(FactoryCuttingBed).filter(

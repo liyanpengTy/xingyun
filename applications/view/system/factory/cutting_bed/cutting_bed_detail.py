@@ -55,7 +55,7 @@ def dispatch(detail_id):
     staffs = db.session.query(FactoryStaff).filter(
         FactoryStaff.dept_id == dept_id,
         FactoryStaff.role_id == role_id,
-        FactoryStaff.staff_status == 'active'
+        FactoryStaff.enable == 1
     ).all()
     db.session.close()
     return render_template('system/factory/cutting_bed_management/detail/no/dispatch.html', detail_id=detail_id, staffs=staffs)

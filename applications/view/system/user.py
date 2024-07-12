@@ -60,7 +60,7 @@ def data():
                 'username': user.username,
                 'realname': user.realname,
                 'phone': user.phone,
-                'user_type': '内部用户' if user.user_type == 'userInternal' else '外部用户',
+                'user_type':"内部用户" if user.user_type == "userInternal" else "外部用户" if user.user_type == "userExternal" else "",
                 'enable': user.enable,
                 'start_time': user.start_time,
                 'end_time': user.end_time,
@@ -110,7 +110,8 @@ def save():
         user_type=user_type,
         enable=enables,
         start_time=start_time,
-        end_time=end_time
+        end_time=end_time,
+        role_id=role_id,
     )
 
     new_user.set_password(password)

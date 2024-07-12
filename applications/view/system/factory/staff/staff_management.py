@@ -9,7 +9,7 @@ from applications.common.utils.http import table_api, fail_api, success_api
 from applications.common.utils.rights import authorize
 from applications.common.utils.validate import str_escape
 from applications.extensions import db
-from applications.models import Role, Dept, FactoryStaff
+from applications.models import Role, Dept, FactoryStaff, User
 from applications.schemas import FactoryStaffSchema
 from sqlalchemy.exc import SQLAlchemyError
 from flask_login import current_user
@@ -59,9 +59,9 @@ def data():
     }
 
     # 在职状态映射
-    staff_status_map = {
-        "active": "在职",
-        "inactive": "离职"
+    enable_map = {
+        1 : "在职",
+        0 : "离职"
     }
 
     for item in result:
@@ -72,7 +72,7 @@ def data():
         item['gender'] = gender_map.get(item['gender'], item['gender'])
 
         # 映射在职状态
-        item['staff_status'] = staff_status_map.get(item['staff_status'], item['staff_status'])
+        item['enable'] = enable_map.get(item['enable'], item['enable'])
 
     return table_api(data=result, count=query.total)
 
@@ -129,25 +129,51 @@ def save():
         gender = True
     elif gender == "false":
         gender = False
-
-    existing_staff = FactoryStaff.query.filter_by(dept_id=dept_id, work_number=work_number).first()
-    if existing_staff:
-        return fail_api(msg="员工工号重复")
-
-    new_staff = FactoryStaff(
-        staff_name=staff_name,
-        work_number=work_number,
-        staff_phone=staff_phone,
-        username=staff_phone,
-        gender=gender,
-        role_id=role_id,
-        salary_type=salary_type,
-        base_salary=base_salary,
-        dept_id=dept_id
-    )
-    new_staff.set_password(password_hash)
-    db.session.add(new_staff)
     try:
+        existing_staff = FactoryStaff.query.filter_by(dept_id=dept_id, work_number=work_number).first()
+        if existing_staff:
+            return fail_api(msg="员工工号重复")
+
+        new_staff = FactoryStaff(
+            staff_name=staff_name,
+            work_number=work_number,
+            staff_phone=staff_phone,
+            username=staff_phone,
+            gender=gender,
+            role_id=role_id,
+            salary_type=salary_type,
+            base_salary=base_salary,
+            dept_id=dept_id
+        )
+        new_staff.set_password(password_hash)
+
+        if bool(User.query.filter_by(username=staff_phone, dept_id=dept_id).count()):
+            return fail_api(msg="在贵司，该手机号已被注册，请更换手机号")
+
+        user_db = db.session.query(User).filter_by(dept_id=dept_id, role_id=current_user.role_id).limit(1).first()
+        new_user = User(
+            username=staff_phone,
+            realname=staff_name,
+            phone=staff_phone,
+            user_type="userExternal",
+            enable=1,
+            start_time=user_db.start_time,
+            end_time=user_db.end_time,
+            role_id=role_id,
+            dept_id=dept_id
+        )
+        new_user.set_password(password_hash)
+        db.session.add(new_user)
+        user_db_new = db.session.query(User).filter_by(
+            username=staff_phone
+        ).first()
+        new_staff.user_id = user_db_new.id
+        db.session.add(new_staff)
+
+        role = Role.query.get(role_id)
+        if role:
+            new_user.role.append(role)
+
         db.session.commit()
         return success_api(msg="新增员工成功")
     except Exception as e:
@@ -159,11 +185,14 @@ def save():
 @bp.delete('/remove/<int:id>')
 @authorize("system:staff:remove", log=True)
 def delete(id):
-    client = FactoryStaff.query.get(id)
-    if client is None:
+    staff = db.session.query(FactoryStaff).get(id)
+    if staff is None:
         return fail_api(msg="未找到员工信息")
-    client.is_deleted = True
+    staff.is_deleted = True
+    user = db.session.query(User).filter_by(id=staff.user_id).first()
+    user.enable = 0
     db.session.commit()
+    db.session.close()
     if client.is_deleted:
         return success_api(msg="删除成功")
     else:
@@ -238,7 +267,14 @@ def update():
         staff = FactoryStaff.query.get(staff_id)
         if not staff:
             return fail_api(msg="员工不存在")
-        FactoryStaff.query.filter_by(id=staff_id).update(data)
+        db.session.query(FactoryStaff).filter_by(id=staff_id).update(data)
+        new_user = User(
+            username=staff_phone,
+            phone=staff_phone,
+            realname=staff_name,
+            role_id=role_id
+        )
+        db.session.query(User).filter_by(id=staff.user_id).update(new_user)
         db.session.commit()
         return success_api(msg="员工信息更新成功")
     except SQLAlchemyError as e:
