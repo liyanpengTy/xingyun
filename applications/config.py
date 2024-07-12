@@ -1,14 +1,12 @@
 import logging
 from datetime import timedelta
 
-
 from urllib.parse import quote_plus as urlquote
-
 
 class BaseConfig:
     SUPERADMIN = 'admin'
 
-    SYSTEM_NAME = 'Xingyun Technology'
+    SYSTEM_NAME = "Xing Yun"
     # 主题面板的链接列表配置
     SYSTEM_PANEL_LINKS = [
         {
