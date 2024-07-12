@@ -7,6 +7,8 @@ from flask_login import login_required, current_user
 from ...models import Power
 from ...schemas import PowerOutSchema
 
+from applications.common.get_system_name import get_system_name
+
 bp = Blueprint('rights', __name__, url_prefix='/rights')
 
 
@@ -17,7 +19,8 @@ def configs():
     # 网站配置
     config = dict(logo={
         # 网站名称
-        "title": current_app.config.get("SYSTEM_NAME"),
+        # "title": current_app.config.get("SYSTEM_NAME"),
+        "title": get_system_name(),
         # 网站图标
         "image": "/static/system/admin/images/logo.png"
         # 菜单配置
