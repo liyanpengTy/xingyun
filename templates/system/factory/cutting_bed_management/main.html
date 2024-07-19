@@ -165,7 +165,7 @@
                     layer.msg('该订单状态无法查看订单详情！');
                 }
             } else if (obj.event === 'outsource') {
-                if (order_status === '裁剪完成' || order_status === '缝制生产'){
+                if (order_status === '裁剪完成' || order_status === '缝制生产' || order_status === '包装发货'){
                     window.location.href = '/system/factory/cutting_bed_management/outsource/' + obj.data['order_id'];
                 } else {
                     layer.msg('该订单状态【' + order_status + '】无法进行厂外协作！');

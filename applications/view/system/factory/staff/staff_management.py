@@ -37,7 +37,7 @@ def data():
         filters.append(FactoryStaff.staff_ame.contains(staff_ame))
     if role_id:
         filters.append(FactoryStaff.role_id == role_id)
-    filters.append(FactoryStaff.is_deleted != 1)
+    filters.append(FactoryStaff.is_deleted == 0)
 
     query = FactoryStaff.query.options(
         db.joinedload(FactoryStaff.dept)
@@ -147,8 +147,8 @@ def save():
         )
         new_staff.set_password(password_hash)
 
-        if bool(User.query.filter_by(username=staff_phone, dept_id=dept_id).count()):
-            return fail_api(msg="在贵司，该手机号已被注册，请更换手机号")
+        if bool(User.query.filter_by(username=staff_phone, enable=1).count()):
+            return fail_api(msg="该手机号已被注册，请更换手机号或联系管理员")
 
         user_db = db.session.query(User).filter_by(dept_id=dept_id, role_id=current_user.role_id).limit(1).first()
         new_user = User(
@@ -192,8 +192,9 @@ def delete(id):
     user = db.session.query(User).filter_by(id=staff.user_id).first()
     user.enable = 0
     db.session.commit()
+    staff_new = db.session.query(FactoryStaff).get(id)
     db.session.close()
-    if client.is_deleted:
+    if staff_new.is_deleted:
         return success_api(msg="删除成功")
     else:
         return fail_api(msg="删除失败")
@@ -253,6 +254,8 @@ def update():
     elif gender == "false":
         gender = False
     data["gender"] = gender
+    enable = str_escape(req_json.get("enable"))
+    data["enable"] = enable
     base_salary = None
     fixed = str_escape(req_json.get("fixed"))
     base = str_escape(req_json.get("base"))
@@ -264,16 +267,16 @@ def update():
         base_salary = base
     data["base_salary"] = base_salary
     try:
-        staff = FactoryStaff.query.get(staff_id)
+        staff = db.session.query(FactoryStaff).get(staff_id)
         if not staff:
             return fail_api(msg="员工不存在")
         db.session.query(FactoryStaff).filter_by(id=staff_id).update(data)
-        new_user = User(
-            username=staff_phone,
-            phone=staff_phone,
-            realname=staff_name,
-            role_id=role_id
-        )
+        new_user = {}
+        new_user['username']=staff_phone
+        new_user['phone']=staff_phone
+        new_user['realname']=staff_name
+        new_user['role_id']=role_id
+        new_user['enable']=enable
         db.session.query(User).filter_by(id=staff.user_id).update(new_user)
         db.session.commit()
         return success_api(msg="员工信息更新成功")

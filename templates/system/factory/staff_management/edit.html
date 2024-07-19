@@ -40,6 +40,15 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
+                    <label class="layui-form-label">在职状态</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="enable" value="1" title="在职"
+                               {% if staff.enable == 1 %}checked{% endif %}>
+                        <input type="radio" name="enable" value="0" title="离职"
+                               {% if staff.enable == 0 %}checked{% endif %}>
+                    </div>
+                </div>
+                <div class="layui-form-item">
                     <label class="layui-form-label">职位</label>
                     <div class="layui-input-block">
                         <select name="roleId" lay-verify="required">

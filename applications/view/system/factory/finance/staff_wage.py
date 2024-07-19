@@ -87,23 +87,6 @@ def data():
     return table_api(data=result, count=query_finance_staff.total)
 
 
-# def get_date_range(year, month):
-#     """
-#     获取指定年月的开始日期和结束日期
-#     :param year: 年份
-#     :param month: 月份
-#     :return: 开始日期和结束日期
-#     """
-#     if month == 1:
-#         year -= 1
-#         month = 12
-#     else:
-#         month -= 1
-#     start_date = datetime.datetime(year, month, 1)
-#     end_date = datetime.datetime(year if month != 12 else year + 1, month + 1 if month != 12 else 1, 1)
-#     return start_date, end_date
-
-
 def get_finance_subsidy(dept_id):
     """
     获取当前部门的补贴信息
@@ -277,7 +260,7 @@ def save():
     try:
         all_staff = db.session.query(FactoryStaff).filter_by(
             dept_id=dept_id,
-            staff_status='active',
+            enable=1,
             is_deleted=False
         ).order_by(FactoryStaff.id).all()
         finance_subsidy = get_finance_subsidy(dept_id)

@@ -26,12 +26,11 @@ def main_piecework(finance_staff_id):
     finance_staff = db.session.query(FactoryFinanceStaff).get(finance_staff_id)
     staff = db.session.query(FactoryStaff).get(finance_staff.staff_id)
     role = db.session.query(Role).get(finance_staff.role_id)
-    staff_status = staff.staff_status
-    if staff_status == "active":
-
-        staff_status = "在职"
-    elif staff_status == "inactive":
-        staff_status = "离职"
+    enable = staff.enable
+    if enable == 1:
+        enable = "在职"
+    elif enable == 0:
+        enable = "离职"
     salary_type = staff.salary_type
     if salary_type == "fixed":
         salary_type = "固定工资"
@@ -46,7 +45,7 @@ def main_piecework(finance_staff_id):
         finance_staff=finance_staff,
         staff=staff,
         role=role,
-        staff_status=staff_status,
+        enable=enable,
         salary_type=salary_type
     )
 
@@ -103,12 +102,11 @@ def main_base_plus_commission(finance_staff_id):
     finance_staff = db.session.query(FactoryFinanceStaff).get(finance_staff_id)
     staff = db.session.query(FactoryStaff).get(finance_staff.staff_id)
     role = db.session.query(Role).get(finance_staff.role_id)
-    staff_status = staff.staff_status
-    if staff_status == "active":
-
-        staff_status = "在职"
-    elif staff_status == "inactive":
-        staff_status = "离职"
+    enable = staff.enable
+    if enable == 1:
+        enable = "在职"
+    elif enable == 0:
+        enable = "离职"
     salary_type = staff.salary_type
     if salary_type == "fixed":
         salary_type = "固定工资"
@@ -123,7 +121,7 @@ def main_base_plus_commission(finance_staff_id):
         finance_staff=finance_staff,
         staff=staff,
         role=role,
-        staff_status=staff_status,
+        enable=enable,
         salary_type=salary_type
     )
 
