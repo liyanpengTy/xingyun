@@ -10,28 +10,28 @@
         <div class="main-container">
             <div class="main-container">
                 <div class="layui-form-item layui-hide">
-                    <label class="layui-form-label">员工id</label>
+                    <label class="layui-form-label">员工id：</label>
                     <div class="layui-input-block">
                         <input type="text" value="{{ staff.id }}" name="staffId" lay-verify="title"
                                autocomplete="off" placeholder="" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">姓名</label>
+                    <label class="layui-form-label">姓名：</label>
                     <div class="layui-input-block">
                         <input type="text" value="{{ staff.staff_name }}" name="staffName" lay-verify="required"
                                autocomplete="off" placeholder="请输入员工姓名" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">手机号</label>
+                    <label class="layui-form-label">手机号：</label>
                     <div class="layui-input-block">
                         <input type="text" value="{{ staff.staff_phone }}" name="staffPhone" lay-verify="required"
                                autocomplete="off" placeholder="请输入联系电话" class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">性别</label>
+                    <label class="layui-form-label">性别：</label>
                     <div class="layui-input-block">
                         <input type="radio" name="gender" value="true" title="男"
                                {% if staff.gender == 1 %}checked{% endif %}>
@@ -40,12 +40,21 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">在职状态</label>
+                    <label class="layui-form-label">在职状态：</label>
                     <div class="layui-input-block">
                         <input type="radio" name="enable" value="1" title="在职"
                                {% if staff.enable == 1 %}checked{% endif %}>
                         <input type="radio" name="enable" value="0" title="离职"
                                {% if staff.enable == 0 %}checked{% endif %}>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">员工类型：</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="staffType" value="0" title="长期工"
+                               {% if staff.staff_type == 0 %}checked{% endif %}>
+                        <input type="radio" name="staffType" value="1" title="短期工"
+                               {% if staff.staff_type == 1 %}checked{% endif %}>
                     </div>
                 </div>
                 <div class="layui-form-item">

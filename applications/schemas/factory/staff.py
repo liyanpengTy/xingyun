@@ -17,5 +17,5 @@ class FactoryStaffSchema(SQLAlchemyAutoSchema):
         include_relationships = True
         fields = [
             "id", "staff_name", "work_number", "gender", "staff_phone", "role_name",
-            "salary_type", "base_salary", "enable"
+            "salary_type", "base_salary", "enable", "staff_type"
         ]

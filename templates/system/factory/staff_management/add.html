@@ -9,42 +9,49 @@
         <div class="main-container">
             <div class="main-container">
                 <div class="layui-form-item">
-                    <label class="layui-form-label">姓名</label>
+                    <label class="layui-form-label">姓名：</label>
                     <div class="layui-input-block">
                         <input type="text" name="staffName" lay-verify="required" autocomplete="off" placeholder="请输入员工姓名"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">工号</label>
+                    <label class="layui-form-label">工号：</label>
                     <div class="layui-input-block">
                         <input type="text" name="workNumber" lay-verify="required" autocomplete="off" placeholder="请输入工号"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">手机号</label>
+                    <label class="layui-form-label">手机号：</label>
                     <div class="layui-input-block">
                         <input type="text" name="staffPhone" lay-verify="required" autocomplete="off" placeholder="请输入联系电话"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">密码</label>
+                    <label class="layui-form-label">密码：</label>
                     <div class="layui-input-block">
                         <input type="text" name="passwordHash" lay-verify="required" autocomplete="off" placeholder="请输入登录密码"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">性别</label>
+                    <label class="layui-form-label">性别：</label>
                     <div class="layui-input-block">
                         <input type="radio" name="gender" value="true" title="男" lay-verify="required" checked>
                         <input type="radio" name="gender" value="false" title="女" lay-verify="required">
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">职位</label>
+                    <label class="layui-form-label">员工类型：</label>
+                    <div class="layui-input-block">
+                        <input type="radio" name="staffType" value=0 title="长期工" lay-verify="required" checked>
+                        <input type="radio" name="staffType" value=1 title="临时工" lay-verify="required">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">职位：</label>
                     <div class="layui-input-block">
                         <select name="roleId" lay-verify="required">
                             <option value="">请选择职位</option>
@@ -55,7 +62,7 @@
                     </div>
                 </div>
                 <div class="layui-form-item">
-                    <label class="layui-form-label">薪资类型</label>
+                    <label class="layui-form-label">薪资类型：</label>
                     <div class="layui-input-block">
                         <select name="salaryType" lay-filter="salaryTypeFilter">
                             <option value="">请选择</option>
@@ -66,14 +73,14 @@
                     </div>
                 </div>
                 <div class="layui-form-item" id="fixedSalaryDiv" style="display: none;">
-                    <label class="layui-form-label">固定薪资</label>
+                    <label class="layui-form-label">固定薪资：</label>
                     <div class="layui-input-block">
                         <input type="text" name="fixed" autocomplete="off" placeholder="请输入固定薪资"
                                class="layui-input">
                     </div>
                 </div>
                 <div class="layui-form-item" id="baseSalaryDiv" style="display: none;">
-                    <label class="layui-form-label">底薪</label>
+                    <label class="layui-form-label">底薪：</label>
                     <div class="layui-input-block">
                         <input type="text" name="base" autocomplete="off" placeholder="请输入底薪"
                                class="layui-input">

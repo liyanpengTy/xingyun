@@ -13,6 +13,7 @@ from applications.models import Role, Dept, FactoryStaff, User
 from applications.schemas import FactoryStaffSchema
 from sqlalchemy.exc import SQLAlchemyError
 from flask_login import current_user
+from applications.view.system.factory.map import staff_type_map, gender_map, enable_map, salary_type_map
 
 bp = Blueprint('staff_management', __name__, url_prefix='/factory/staff_management')
 
@@ -30,49 +31,28 @@ def main():
 @authorize("system:staff:main")
 def data():
     # 获取请求参数
-    staff_ame = str_escape(request.args.get('staffName', type=str))
+    staff_name = str_escape(request.args.get('staffName', type=str))
     role_id = str_escape(request.args.get('roleId', type=str))
     filters = []
-    if staff_ame:
-        filters.append(FactoryStaff.staff_ame.contains(staff_ame))
+    if staff_name:
+        filters.append(FactoryStaff.staff_name.contains(staff_name))
     if role_id:
         filters.append(FactoryStaff.role_id == role_id)
     filters.append(FactoryStaff.is_deleted == 0)
 
-    query = FactoryStaff.query.options(
+    query = db.session.query(FactoryStaff).options(
         db.joinedload(FactoryStaff.dept)
     ).filter(*filters).layui_paginate()
 
     schema = FactoryStaffSchema(many=True)
     result = schema.dump(query)
 
-    salary_type_map = {
-        "fixed": "固定薪资",
-        "base_plus_commission": "底薪+提成",
-        "piecework": "计件"
-    }
-
-    # 性别映射
-    gender_map = {
-        True: "男",
-        False: "女"
-    }
-
-    # 在职状态映射
-    enable_map = {
-        1 : "在职",
-        0 : "离职"
-    }
-
     for item in result:
-        # 映射薪资类型
+        # 格式化数据（字典映射）
         item['salary_type'] = salary_type_map.get(item['salary_type'], item['salary_type'])
-
-        # 映射性别
         item['gender'] = gender_map.get(item['gender'], item['gender'])
-
-        # 映射在职状态
         item['enable'] = enable_map.get(item['enable'], item['enable'])
+        item['staff_type'] = staff_type_map.get(item['staff_type'], item['staff_type'])
 
     return table_api(data=result, count=query.total)
 
@@ -103,6 +83,7 @@ def save():
     password_hash = str_escape(req.get('passwordHash'))
     gender = req.get('gender')
     role_id = str_escape(req.get('roleId'))
+    staff_type = req.get('staffType')
     salary_type = str_escape(req.get('salaryType'))
     fixed = str_escape(req.get('fixed'))
     base = str_escape(req.get('base'))
@@ -119,6 +100,8 @@ def save():
         return fail_api(msg="性别不能为空")
     if not role_id:
         return fail_api(msg="职位不能为空")
+    if not staff_type:
+        return fail_api(msg="员工类型不能为空")
     if not salary_type:
         return fail_api(msg="薪资类型不能为空")
     if fixed:
@@ -141,6 +124,7 @@ def save():
             username=staff_phone,
             gender=gender,
             role_id=role_id,
+            staff_type=staff_type,
             salary_type=salary_type,
             base_salary=base_salary,
             dept_id=dept_id
@@ -179,6 +163,8 @@ def save():
     except Exception as e:
         db.session.rollback()
         return fail_api(msg="保存失败： " + str(e))
+    finally:
+        db.session.close()
 
 
 #  删除员工
@@ -244,6 +230,11 @@ def update():
         data['salary_type'] = salary_type
     else:
         return fail_api(msg="薪资类型不能为空")
+    staff_type = str_escape(req_json.get("staffType"))
+    if staff_type:
+        data['staff_type'] = staff_type
+    else:
+        return fail_api(msg="员工类型不能为空")
     gender = str_escape(req_json.get('gender'))
     if gender:
         data['gender'] = gender
@@ -283,3 +274,5 @@ def update():
     except SQLAlchemyError as e:
         db.session.rollback()
         return fail_api(msg="更新失败" + str(e))
+    finally:
+        db.session.close()

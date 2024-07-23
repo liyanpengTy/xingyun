@@ -19,6 +19,7 @@ class FactoryStaff(db.Model, UserMixin):
     gender = db.Column(db.Boolean, comment='性别：【1-男，0-女】')
     staff_phone = db.Column(db.String(20), comment='联系电话')
     salary_type = db.Column(db.String(50), comment='薪资类型(fixed：固定薪资；base_plus_commission：底薪+提成；piecework：计件工资)')
+    staff_type = db.Column(db.Integer, comment='员工类型（0-全职，1-临时工）')
     enable = db.Column(db.Integer, default=1, comment='在职状态(1:在职；0：离职)')
     base_salary = db.Column(db.Numeric(15, 2), default=None, comment='固定金额的底薪')
     password_hash = db.Column(db.String(128), nullable=False, comment='哈希密码')
